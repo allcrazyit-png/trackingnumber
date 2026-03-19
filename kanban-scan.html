@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>看板比對系統</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@400;700;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:      #060c18;
+      --surface: #0b1424;
+      --card:    #0f1a2e;
+      --border:  #1a2d4a;
+      --text:    #c8d6ec;
+      --muted:   #3d5470;
+      --cyan:    #00c8ff;
+      --green:   #00e676;
+      --red:     #ff1744;
+      --orange:  #ff6d00;
+      --amber:   #ffab00;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      /* Dot grid background */
+      background-image: radial-gradient(circle, #1a2d4a 1px, transparent 1px);
+      background-size: 28px 28px;
+    }
+
+    .hidden { display: none !important; }
+
+    /* ── Scanner input ─────────────────────── */
+    #barcode-input {
+      position: fixed; top: -9999px; left: -9999px;
+      opacity: 0; width: 1px; height: 1px;
+    }
+
+    /* ── Flash overlay ─────────────────────── */
+    #flash-overlay {
+      position: fixed; inset: 0;
+      pointer-events: none; z-index: 200;
+      opacity: 0; transition: opacity 0.15s;
+    }
+
+    /* ═══════════════════════════════════════════
+       HEADER
+    ═══════════════════════════════════════════ */
+    header {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      padding: 12px 28px;
+      background: rgba(11,20,36,0.95);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(8px);
+      position: sticky; top: 0; z-index: 10;
+    }
+
+    .logo {
+      display: flex; align-items: center; gap: 10px;
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 700; font-size: 1.1rem;
+      color: var(--cyan);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .logo-icon {
+      width: 32px; height: 32px;
+      border: 2px solid var(--cyan);
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; font-family: 'JetBrains Mono', monospace;
+      font-weight: 800; color: var(--cyan);
+    }
+
+    .divider { width: 1px; height: 32px; background: var(--border); flex-shrink: 0; }
+
+    /* Reference number pill */
+    .ref-pill {
+      flex: 1;
+      display: flex; align-items: center; gap: 12px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 18px;
+      min-width: 0;
+    }
+    .ref-pill-label {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.7rem; font-weight: 600;
+      color: var(--muted); text-transform: uppercase; letter-spacing: 2px;
+      white-space: nowrap;
+    }
+    #ref-display {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700; font-size: 1.3rem;
+      color: var(--cyan); letter-spacing: 3px;
+      flex: 1; truncate: ellipsis; overflow: hidden;
+      white-space: nowrap; text-overflow: ellipsis;
+    }
+    #ref-display.empty { color: var(--muted); font-size: 0.9rem; font-weight: 400; letter-spacing: 1px; font-family: 'DM Sans', sans-serif; }
+
+    /* Scan counter */
+    .scan-counter {
+      display: flex; flex-direction: column; align-items: center;
+      font-family: 'Rajdhani', sans-serif;
+    }
+    .scan-counter-val {
+      font-size: 1.5rem; font-weight: 700; color: var(--text);
+      line-height: 1;
+    }
+    .scan-counter-lbl {
+      font-size: 0.6rem; color: var(--muted); letter-spacing: 1px; text-transform: uppercase;
+    }
+
+    /* Reset button */
+    #btn-reset {
+      display: flex; align-items: center; gap: 6px;
+      padding: 8px 16px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--muted);
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.85rem; font-weight: 600;
+      letter-spacing: 1px; cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    #btn-reset:hover { border-color: var(--red); color: var(--red); }
+
+    /* ═══════════════════════════════════════════
+       MAIN
+    ═══════════════════════════════════════════ */
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 24px 28px;
+      gap: 20px;
+      max-width: 1400px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* ── Status card ───────────────────────── */
+    #status-card {
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      background: var(--card);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 56px 40px;
+      gap: 12px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.3s, background 0.3s, box-shadow 0.3s;
+    }
+
+    /* Scanline idle animation */
+    #status-card::before {
+      content: '';
+      position: absolute;
+      top: -40%; left: 0; right: 0;
+      height: 40%;
+      background: linear-gradient(to bottom, transparent, rgba(0,200,255,0.04), transparent);
+      animation: scanline 3s linear infinite;
+    }
+    @keyframes scanline {
+      0%   { top: -40%; }
+      100% { top: 140%; }
+    }
+
+    #status-card.state-set {
+      border-color: var(--cyan);
+      box-shadow: 0 0 40px rgba(0,200,255,0.12), inset 0 0 60px rgba(0,200,255,0.04);
+    }
+    #status-card.state-ok {
+      border-color: var(--green);
+      box-shadow: 0 0 40px rgba(0,230,118,0.15), inset 0 0 60px rgba(0,230,118,0.05);
+      animation: ok-pulse 0.4s ease-out;
+    }
+    @keyframes ok-pulse {
+      0%   { box-shadow: 0 0 80px rgba(0,230,118,0.5); }
+      100% { box-shadow: 0 0 40px rgba(0,230,118,0.15); }
+    }
+    #status-card.state-idle { border-color: var(--border); box-shadow: none; }
+
+    .status-eyebrow {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.7rem; font-weight: 600;
+      letter-spacing: 4px; text-transform: uppercase;
+      color: var(--muted);
+    }
+    #status-msg {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 3.5rem; font-weight: 700;
+      line-height: 1; letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text);
+      transition: color 0.2s;
+    }
+    #status-msg.state-set   { color: var(--cyan); }
+    #status-msg.state-ok    { color: var(--green); }
+    #status-msg.state-idle  { color: var(--muted); }
+
+    #status-sub {
+      font-size: 0.95rem; color: var(--muted);
+      font-family: 'Rajdhani', sans-serif;
+      letter-spacing: 1px;
+    }
+
+    /* ── Counter panels ────────────────────── */
+    .counters {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .counter-panel {
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      background: var(--card);
+      padding: 28px 32px;
+      position: relative;
+      overflow: hidden;
+    }
+    .counter-panel.internal { border-color: rgba(0,200,255,0.25); }
+    .counter-panel.customer { border-color: rgba(255,109,0,0.25); }
+
+    .counter-label {
+      display: flex; align-items: center; gap: 8px;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.8rem; font-weight: 600;
+      letter-spacing: 3px; text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .counter-label.internal { color: var(--cyan); }
+    .counter-label.customer { color: var(--orange); }
+
+    .counter-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+    }
+    .internal .counter-dot { background: var(--cyan); box-shadow: 0 0 8px var(--cyan); }
+    .customer .counter-dot { background: var(--orange); box-shadow: 0 0 8px var(--orange); }
+
+    .counter-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 5rem; font-weight: 800;
+      line-height: 1;
+      transition: transform 0.1s;
+    }
+    .internal .counter-num { color: var(--cyan); }
+    .customer .counter-num { color: var(--orange); }
+
+    .counter-ghost {
+      position: absolute;
+      right: -10px; bottom: -20px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10rem; font-weight: 800;
+      opacity: 0.04; line-height: 1;
+      pointer-events: none; user-select: none;
+    }
+    .internal .counter-ghost { color: var(--cyan); }
+    .customer .counter-ghost { color: var(--orange); }
+
+    /* ── History ───────────────────────────── */
+    .history-panel {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--card);
+      overflow: hidden;
+    }
+    .history-head {
+      padding: 12px 20px;
+      background: rgba(26,45,74,0.4);
+      border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .history-head-title {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.75rem; font-weight: 600;
+      letter-spacing: 3px; text-transform: uppercase;
+      color: var(--muted);
+    }
+    table {
+      width: 100%; border-collapse: collapse;
+    }
+    thead th {
+      padding: 8px 20px;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.65rem; font-weight: 600;
+      letter-spacing: 2px; text-transform: uppercase;
+      color: var(--muted);
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    tbody tr {
+      border-bottom: 1px solid rgba(26,45,74,0.6);
+      transition: background 0.15s;
+    }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: rgba(26,45,74,0.4); }
+    td {
+      padding: 8px 20px;
+      font-size: 0.85rem;
+    }
+    .td-time { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--muted); }
+    .td-product { font-family: 'JetBrains Mono', monospace; font-weight: 700; letter-spacing: 1px; }
+    .td-result { text-align: right; font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 0.9rem; letter-spacing: 1px; }
+
+    .badge {
+      display: inline-block; padding: 2px 8px; border-radius: 4px;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.65rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+    }
+    .badge-i { background: rgba(0,200,255,0.12); color: var(--cyan); border: 1px solid rgba(0,200,255,0.25); }
+    .badge-c { background: rgba(255,109,0,0.12); color: var(--orange); border: 1px solid rgba(255,109,0,0.25); }
+
+    .res-ok    { color: var(--green); }
+    .res-set   { color: var(--cyan); }
+    .res-error { color: var(--red); }
+
+    /* ── Status bar ────────────────────────── */
+    footer {
+      background: rgba(6,12,24,0.95);
+      border-top: 1px solid var(--border);
+      padding: 5px 28px;
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 0.65rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--muted);
+    }
+    .footer-right { display: flex; align-items: center; gap: 16px; }
+    #status-dot-text::before {
+      content: '●';
+      color: var(--green);
+      margin-right: 5px;
+      animation: blink 2s infinite;
+    }
+    @keyframes blink { 50% { opacity: 0.3; } }
+
+    /* ═══════════════════════════════════════════
+       ALERT VIEW
+    ═══════════════════════════════════════════ */
+    #alert-view {
+      position: fixed; inset: 0; z-index: 100;
+      background: #0d0003;
+      display: flex; flex-direction: column;
+      animation: alert-in 0.2s ease-out;
+    }
+    @keyframes alert-in {
+      from { opacity: 0; transform: scale(1.02); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    /* Pulsing red radial */
+    #alert-view::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at center, rgba(255,23,68,0.25) 0%, transparent 70%);
+      animation: alert-pulse 1.2s ease-in-out infinite alternate;
+      pointer-events: none;
+    }
+    @keyframes alert-pulse {
+      from { opacity: 0.5; }
+      to   { opacity: 1; }
+    }
+
+    .alert-header {
+      padding: 16px 40px;
+      border-bottom: 1px solid rgba(255,23,68,0.3);
+      display: flex; align-items: center; gap: 12px;
+      position: relative;
+    }
+    .alert-header-title {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.8rem; font-weight: 700;
+      letter-spacing: 4px; text-transform: uppercase;
+      color: rgba(255,100,120,0.8);
+    }
+    .alert-blink {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--red);
+      box-shadow: 0 0 12px var(--red);
+      animation: blink 0.6s infinite;
+    }
+
+    .alert-main {
+      flex: 1;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 40px;
+      gap: 40px;
+      position: relative;
+    }
+
+    .alert-headline {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 5rem; font-weight: 700;
+      color: var(--red);
+      letter-spacing: 4px; text-transform: uppercase;
+      text-align: center;
+      text-shadow: 0 0 40px rgba(255,23,68,0.6);
+    }
+
+    .alert-codes {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 20px; align-items: center;
+      width: 100%; max-width: 900px;
+    }
+    .alert-code-box {
+      border: 2px solid;
+      border-radius: 12px;
+      padding: 24px 32px;
+      text-align: center;
+    }
+    .alert-code-box.expected {
+      border-color: rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.04);
+    }
+    .alert-code-box.wrong {
+      border-color: rgba(255,23,68,0.5);
+      background: rgba(255,23,68,0.08);
+    }
+    .alert-code-label {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.7rem; font-weight: 700;
+      letter-spacing: 3px; text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .expected .alert-code-label { color: rgba(255,255,255,0.4); }
+    .wrong .alert-code-label    { color: var(--red); }
+    .alert-code-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 800; font-size: 2rem;
+      letter-spacing: 3px;
+    }
+    .expected .alert-code-val { color: #e8edf5; }
+    .wrong .alert-code-val    { color: var(--red); text-shadow: 0 0 20px rgba(255,23,68,0.5); }
+
+    .alert-vs {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1.5rem; font-weight: 700;
+      color: var(--muted); letter-spacing: 2px;
+    }
+
+    #btn-resolve {
+      padding: 18px 60px;
+      background: transparent;
+      border: 2px solid rgba(255,23,68,0.5);
+      border-radius: 10px;
+      color: var(--red);
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1.2rem; font-weight: 700;
+      letter-spacing: 3px; text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    #btn-resolve:hover {
+      background: rgba(255,23,68,0.1);
+      border-color: var(--red);
+      box-shadow: 0 0 30px rgba(255,23,68,0.2);
+    }
+    #btn-resolve:active { transform: scale(0.97); }
+  </style>
+</head>
+
+<body>
+  <input id="barcode-input" type="password" autofocus lang="en" spellcheck="false" autocomplete="off" />
+  <div id="flash-overlay"></div>
+
+  <!-- ════════ MAIN VIEW ════════ -->
+  <div id="main-view">
+    <header>
+      <div class="logo">
+        <div class="logo-icon">KB</div>
+        看板比對
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="ref-pill">
+        <span class="ref-pill-label">基準料號</span>
+        <span id="ref-display" class="empty">尚未掃描</span>
+      </div>
+
+      <div class="scan-counter">
+        <span class="scan-counter-val" id="scan-count">0</span>
+        <span class="scan-counter-lbl">已掃張數</span>
+      </div>
+
+      <div class="divider"></div>
+
+      <button id="btn-reset">⟳ 重置 <span style="opacity:.5;font-size:.8em">ESC</span></button>
+    </header>
+
+    <main>
+      <!-- Status card -->
+      <div id="status-card" class="state-idle">
+        <span class="status-eyebrow" id="status-eyebrow">STANDBY</span>
+        <div id="status-msg" class="state-idle">請掃描看板</div>
+        <div id="status-sub">客戶看板或場內看板皆可先掃</div>
+      </div>
+
+      <!-- Counter panels -->
+      <div class="counters">
+        <div class="counter-panel internal">
+          <div class="counter-label internal">
+            <span class="counter-dot"></span>場內看板
+          </div>
+          <div class="counter-num" id="count-internal">0</div>
+          <div class="counter-ghost" id="ghost-internal">0</div>
+        </div>
+        <div class="counter-panel customer">
+          <div class="counter-label customer">
+            <span class="counter-dot"></span>客戶看板
+          </div>
+          <div class="counter-num" id="count-customer">0</div>
+          <div class="counter-ghost" id="ghost-customer">0</div>
+        </div>
+      </div>
+
+      <!-- History -->
+      <div class="history-panel">
+        <div class="history-head">
+          <span class="history-head-title">掃描記錄</span>
+          <span style="font-family:'Rajdhani',sans-serif;font-size:.65rem;color:var(--muted);letter-spacing:2px">最近 10 筆</span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th style="width:90px">時間</th>
+              <th style="width:80px">類別</th>
+              <th>料號</th>
+              <th style="width:80px;text-align:right">結果</th>
+            </tr>
+          </thead>
+          <tbody id="scan-history">
+            <tr><td colspan="4" style="padding:24px;text-align:center;color:var(--muted);font-style:italic">尚無記錄</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+
+    <footer>
+      <span>看板比對系統 v1.0 · <span id="last-raw" style="color:var(--cyan)">---</span></span>
+      <div class="footer-right">
+        <span id="status-dot-text">系統就緒</span>
+        <span>掃描槍鎖定中</span>
+      </div>
+    </footer>
+  </div>
+
+  <!-- ════════ ALERT VIEW ════════ -->
+  <div id="alert-view" class="hidden">
+    <div class="alert-header">
+      <div class="alert-blink"></div>
+      <span class="alert-header-title">⚠ MISMATCH DETECTED — 料號不符警報</span>
+    </div>
+    <div class="alert-main">
+      <div class="alert-headline">料號不符</div>
+      <div class="alert-codes">
+        <div class="alert-code-box expected">
+          <div class="alert-code-label">基準料號（正確）</div>
+          <div class="alert-code-val" id="alert-expected">---</div>
+        </div>
+        <div class="alert-vs">≠</div>
+        <div class="alert-code-box wrong">
+          <div class="alert-code-label">掃到的料號（錯誤）</div>
+          <div class="alert-code-val" id="alert-scanned">---</div>
+        </div>
+      </div>
+      <button id="btn-resolve">確認處理完畢，解除警報</button>
+    </div>
+  </div>
+
+  <script>
+    // ── 設定 ─────────────────────────────────────────────
+    const INTERNAL_PREFIX = 'MY-';
+    // ─────────────────────────────────────────────────────
+
+    const state = { ref: null, total: 0, countInternal: 0, countCustomer: 0 };
+
+    const el  = id => document.getElementById(id);
+    const Els = {
+      input:         el('barcode-input'),
+      mainView:      el('main-view'),
+      alertView:     el('alert-view'),
+      statusCard:    el('status-card'),
+      statusMsg:     el('status-msg'),
+      statusSub:     el('status-sub'),
+      statusEyebrow: el('status-eyebrow'),
+      refDisplay:    el('ref-display'),
+      scanCount:     el('scan-count'),
+      countInternal: el('count-internal'),
+      countCustomer: el('count-customer'),
+      ghostInternal: el('ghost-internal'),
+      ghostCustomer: el('ghost-customer'),
+      historyBody:   el('scan-history'),
+      lastRaw:       el('last-raw'),
+      dotText:       el('status-dot-text'),
+      alertExpected: el('alert-expected'),
+      alertScanned:  el('alert-scanned'),
+      flashOverlay:  el('flash-overlay'),
+    };
+
+    // ── IME 轉換 ─────────────────────────────────────────
+    function toHalf(str) {
+      return str.replace(/[\uff01-\uff5e]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xfee0))
+                .replace(/\u3000/g, ' ');
+    }
+
+    // ── 料號擷取 ─────────────────────────────────────────
+    function extractProduct(raw) {
+      const s = toHalf(raw).trim();
+      if (s.includes('J004')) {
+        const m = s.match(/\sE(.{15})(.{12})/);
+        if (m) return { kind: 'customer', product: m[2] };
+        return { kind: 'customer', product: null };
+      }
+      if (INTERNAL_PREFIX && s.startsWith(INTERNAL_PREFIX))
+        return { kind: 'internal', product: s.slice(INTERNAL_PREFIX.length).trim() };
+      return { kind: 'internal', product: s };
+    }
+
+    // ── 主處理 ────────────────────────────────────────────
+    function handleScan(raw) {
+      Els.lastRaw.textContent = raw.length > 50 ? raw.slice(0, 50) + '…' : raw;
+
+      if (/[\u4E00-\u9FFF\u3100-\u312F]/.test(raw)) {
+        flash('rgba(255,171,0,0.25)');
+        return;
+      }
+
+      const { kind, product } = extractProduct(raw);
+      const kindLabel = kind === 'customer' ? '客戶' : '場內';
+
+      if (!product) {
+        setCard('idle', '無法擷取料號', `條碼格式不符：${raw.slice(0, 30)}`, 'ERROR');
+        beep('error'); return;
+      }
+
+      state.total++;
+      Els.scanCount.textContent = state.total;
+
+      if (kind === 'internal') {
+        state.countInternal++;
+        Els.countInternal.textContent = state.countInternal;
+        Els.ghostInternal.textContent = state.countInternal;
+        bumpCounter(Els.countInternal);
+      } else {
+        state.countCustomer++;
+        Els.countCustomer.textContent = state.countCustomer;
+        Els.ghostCustomer.textContent = state.countCustomer;
+        bumpCounter(Els.countCustomer);
+      }
+
+      if (state.ref === null) {
+        state.ref = product;
+        Els.refDisplay.textContent = product;
+        Els.refDisplay.classList.remove('empty');
+        Els.dotText.textContent = '比對中';
+        setCard('set', '基準已設定', `${kindLabel}看板 · ${product}`, 'LOCKED');
+        addHistory(product, kindLabel, kind, 'set');
+        beep('ok');
+      } else if (product === state.ref) {
+        setCard('ok', '料號一致', `${kindLabel}看板 · ${product}`, 'MATCH OK');
+        addHistory(product, kindLabel, kind, 'ok');
+        beep('ok');
+      } else {
+        addHistory(product, kindLabel, kind, 'error');
+        beep('error');
+        triggerAlert(product);
+      }
+    }
+
+    // ── 狀態卡 ────────────────────────────────────────────
+    function setCard(st, msg, sub, eyebrow) {
+      Els.statusCard.className = `state-${st}`;
+      Els.statusMsg.className = `state-${st}`;
+      Els.statusMsg.textContent = msg;
+      Els.statusSub.textContent = sub || '';
+      Els.statusEyebrow.textContent = eyebrow || '';
+    }
+
+    function bumpCounter(el) {
+      el.style.transform = 'scale(1.15)';
+      setTimeout(() => { el.style.transform = ''; }, 120);
+    }
+
+    // ── 警報 ──────────────────────────────────────────────
+    function triggerAlert(wrongProduct) {
+      Els.alertExpected.textContent = state.ref;
+      Els.alertScanned.textContent  = wrongProduct;
+      Els.alertView.classList.remove('hidden');
+      Els.mainView.classList.add('hidden');
+      playAlertSound();
+    }
+
+    el('btn-resolve').onclick = () => {
+      Els.alertView.classList.add('hidden');
+      Els.mainView.classList.remove('hidden');
+      Els.input.focus();
+    };
+
+    // ── 重置 ──────────────────────────────────────────────
+    function doReset() {
+      state.ref = null; state.total = 0;
+      state.countInternal = 0; state.countCustomer = 0;
+      Els.scanCount.textContent       = '0';
+      Els.countInternal.textContent   = '0';
+      Els.countCustomer.textContent   = '0';
+      Els.ghostInternal.textContent   = '0';
+      Els.ghostCustomer.textContent   = '0';
+      Els.refDisplay.innerHTML        = '尚未掃描';
+      Els.refDisplay.className        = 'empty';
+      Els.dotText.textContent         = '系統就緒';
+      Els.historyBody.innerHTML       = '<tr><td colspan="4" style="padding:24px;text-align:center;color:var(--muted);font-style:italic">尚無記錄</td></tr>';
+      Els.lastRaw.textContent         = '---';
+      setCard('idle', '請掃描看板', '客戶看板或場內看板皆可先掃', 'STANDBY');
+      Els.input.focus();
+    }
+    el('btn-reset').onclick = doReset;
+
+    // ── 歷史 ──────────────────────────────────────────────
+    function addHistory(product, kindLabel, kind, result) {
+      const now   = new Date().toLocaleTimeString('zh-TW', { hour12: false });
+      const badge = kind === 'internal'
+        ? '<span class="badge badge-i">場內</span>'
+        : '<span class="badge badge-c">客戶</span>';
+      const res   = result === 'ok'    ? '<span class="td-result res-ok">✓ 一致</span>'
+                  : result === 'set'   ? '<span class="td-result res-set">● 基準</span>'
+                  : '<span class="td-result res-error">✗ 不符</span>';
+
+      if (Els.historyBody.querySelector('[colspan]'))
+        Els.historyBody.innerHTML = '';
+
+      const row = document.createElement('tr');
+      row.innerHTML =
+        `<td class="td-time">${now}</td>` +
+        `<td>${badge}</td>` +
+        `<td class="td-product">${product || '?'}</td>` +
+        `<td>${res}</td>`;
+      Els.historyBody.insertBefore(row, Els.historyBody.firstChild);
+      while (Els.historyBody.children.length > 10)
+        Els.historyBody.removeChild(Els.historyBody.lastChild);
+    }
+
+    // ── 閃爍 ──────────────────────────────────────────────
+    function flash(color) {
+      Els.flashOverlay.style.background = color;
+      Els.flashOverlay.style.opacity = '1';
+      setTimeout(() => { Els.flashOverlay.style.opacity = '0'; }, 80);
+    }
+
+    // ── 音效 ──────────────────────────────────────────────
+    function beep(type) {
+      try {
+        const ctx  = new (window.AudioContext || window.webkitAudioContext)();
+        const osc  = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.frequency.value = type === 'ok' ? 880 : 300;
+        osc.type = 'sine';
+        gain.gain.setValueAtTime(0.2, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+        osc.start(); osc.stop(ctx.currentTime + 0.3);
+      } catch (e) {}
+    }
+
+    function playAlertSound() {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        for (let i = 0; i < 4; i++) {
+          const osc  = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain); gain.connect(ctx.destination);
+          osc.frequency.value = i % 2 === 0 ? 880 : 1200;
+          osc.type = 'square';
+          const t = ctx.currentTime + i * 0.35;
+          gain.gain.setValueAtTime(0.4, t);
+          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
+          osc.start(t); osc.stop(t + 0.3);
+        }
+      } catch (e) {}
+    }
+
+    // ── 輸入 ──────────────────────────────────────────────
+    Els.input.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === 'Tab') {
+        const v = Els.input.value.trim();
+        Els.input.value = '';
+        e.preventDefault();
+        if (v) handleScan(v);
+      }
+    });
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') { e.preventDefault(); doReset(); }
+      if (e.metaKey || e.ctrlKey) return;
+      if (Els.alertView.classList.contains('hidden')) Els.input.focus();
+    });
+
+    document.addEventListener('click', e => {
+      if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
+      if (Els.alertView.classList.contains('hidden')) Els.input.focus();
+    });
+
+    Els.input.focus();
+  </script>
+</body>
+</html>

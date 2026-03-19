@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html class="dark" lang="zh-Hant"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>工廠理貨防錯系統主儀表板 (繁中)</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#135bec",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#101622",
+                        "industry-orange": "#f97316",
+                        "industry-green": "#22c55e",
+                        "industry-red": "#ef4444",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "Noto Sans TC", "sans-serif"],
+                        "sans": ["Noto Sans TC", "system-ui", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        body {
+            font-family: 'Noto Sans TC', 'Space Grotesk', sans-serif;
+        }
+        .scanner-input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen flex flex-col">
+<input autofocus="" class="scanner-input" type="text"/>
+<header class="flex items-center justify-between px-8 py-4 bg-background-light dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2 text-primary">
+<span class="material-symbols-outlined text-4xl">precision_manufacturing</span>
+<h1 class="text-2xl font-black tracking-tight">理貨系統</h1>
+</div>
+<div class="h-10 w-[2px] bg-slate-300 dark:bg-slate-700"></div>
+<div class="flex flex-col">
+<span class="text-[10px] font-bold text-slate-500 uppercase">理貨計時器</span>
+<div class="flex items-center gap-3 bg-primary/10 px-4 py-1 rounded-lg border border-primary/20">
+<span class="material-symbols-outlined text-primary text-xl">timer</span>
+<span class="text-2xl font-bold font-mono text-primary">00:00:00</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-3 bg-slate-200 dark:bg-slate-800 px-6 py-2 rounded-lg border border-slate-300 dark:border-slate-700">
+<span class="text-sm font-bold text-slate-500 dark:text-slate-400">當前鎖定品號：</span>
+<span class="text-lg font-black text-industry-red flex items-center gap-2">
+<span class="material-symbols-outlined">scan_delete</span>
+                尚未掃描
+            </span>
+</div>
+<div class="flex items-center gap-2 px-3 py-2 bg-industry-green/10 text-industry-green rounded-full text-sm font-black border border-industry-green/20">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-industry-green opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-industry-green"></span>
+</span>
+            系統就緒
+        </div>
+</div>
+</header>
+<main class="flex-1 flex flex-col p-6 gap-6 max-w-[1600px] mx-auto w-full">
+<section class="w-full">
+<button class="w-full bg-industry-green hover:bg-industry-green/90 text-white py-6 rounded-xl shadow-lg flex items-center justify-center gap-4 transition-all active:scale-[0.99]">
+<span class="material-symbols-outlined text-4xl">play_circle</span>
+<span class="text-4xl font-black tracking-widest">開始理貨任務</span>
+</button>
+</section>
+<section class="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1">
+<div class="relative group bg-primary/5 dark:bg-primary/10 border-4 border-primary/30 rounded-2xl flex flex-col items-center justify-center p-12 overflow-hidden">
+<div class="absolute top-4 left-6 flex items-center gap-2 text-primary">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="text-2xl font-black">場內看板</span>
+</div>
+<div class="text-[14rem] font-black leading-none text-primary drop-shadow-md">0</div>
+<div class="text-3xl font-black text-primary/60 mt-4">已掃張數</div>
+<span class="material-symbols-outlined absolute -bottom-10 -right-10 text-[20rem] opacity-5 text-primary rotate-12">conveyor_belt</span>
+</div>
+<div class="relative group bg-industry-orange/5 dark:bg-industry-orange/10 border-4 border-industry-orange/30 rounded-2xl flex flex-col items-center justify-center p-12 overflow-hidden">
+<div class="absolute top-4 left-6 flex items-center gap-2 text-industry-orange">
+<span class="material-symbols-outlined">local_shipping</span>
+<span class="text-2xl font-black">客戶看板</span>
+</div>
+<div class="text-[14rem] font-black leading-none text-industry-orange drop-shadow-md">0</div>
+<div class="text-3xl font-black text-industry-orange/60 mt-4">已掃張數</div>
+<span class="material-symbols-outlined absolute -bottom-10 -right-10 text-[20rem] opacity-5 text-industry-orange rotate-12">package_2</span>
+</div>
+</section>
+<section class="w-full">
+<button class="w-full bg-industry-red hover:bg-industry-red/90 text-white py-5 rounded-xl shadow-lg flex items-center justify-center gap-4 transition-all active:scale-[0.99]">
+<span class="material-symbols-outlined text-3xl">task_alt</span>
+<span class="text-2xl font-black tracking-wider">結束並總結任務</span>
+</button>
+</section>
+<footer class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-sm">
+<div class="px-6 py-4 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center">
+<h3 class="text-lg font-black flex items-center gap-2">
+<span class="material-symbols-outlined text-slate-500">history</span>
+                最近掃描紀錄
+            </h3>
+<span class="text-sm font-bold text-slate-500">最近 5 筆掃描</span>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="text-slate-500 dark:text-slate-400 text-xs font-black uppercase tracking-widest border-b border-slate-100 dark:border-slate-800">
+<th class="px-6 py-4 w-1/4">時間</th>
+<th class="px-6 py-4 w-1/4">類別</th>
+<th class="px-6 py-4">內容縮寫</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-4 font-mono text-sm text-slate-500">14:22:15.004</td>
+<td class="px-6 py-4">
+<span class="bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-black border border-primary/20">場內 (Internal)</span>
+</td>
+<td class="px-6 py-4 font-bold tracking-wider text-lg">LOC-A2-098</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-4 font-mono text-sm text-slate-500">14:21:44.291</td>
+<td class="px-6 py-4">
+<span class="bg-industry-orange/10 text-industry-orange px-3 py-1 rounded-full text-xs font-black border border-industry-orange/20">客戶 (Customer)</span>
+</td>
+<td class="px-6 py-4 font-bold tracking-wider text-lg">SKU-9921-XF</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors opacity-70">
+<td class="px-6 py-4 font-mono text-sm text-slate-500">14:20:10.512</td>
+<td class="px-6 py-4">
+<span class="bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-black border border-primary/20">場內 (Internal)</span>
+</td>
+<td class="px-6 py-4 font-bold tracking-wider text-lg">LOC-B1-012</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors opacity-50">
+<td class="px-6 py-4 font-mono text-sm text-slate-500">14:18:02.883</td>
+<td class="px-6 py-4">
+<span class="bg-industry-orange/10 text-industry-orange px-3 py-1 rounded-full text-xs font-black border border-industry-orange/20">客戶 (Customer)</span>
+</td>
+<td class="px-6 py-4 font-bold tracking-wider text-lg">SKU-0012-TR</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors opacity-30">
+<td class="px-6 py-4 font-mono text-sm text-slate-500">14:15:55.120</td>
+<td class="px-6 py-4">
+<span class="bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-black border border-primary/20">場內 (Internal)</span>
+</td>
+<td class="px-6 py-4 font-bold tracking-wider text-lg">LOC-A1-001</td>
+</tr>
+</tbody>
+</table>
+</div>
+</footer>
+</main>
+<div class="fixed bottom-0 left-0 right-0 bg-slate-900 text-white text-[10px] px-4 py-1 flex justify-between items-center opacity-70">
+<div class="flex gap-4">
+<span>工作站：PK-04</span>
+<span>操作員：ID_88291</span>
+<span>系統版本：INDUSTRIAL-OS v2.4</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]">keyboard</span>
+        掃描槍輸入已鎖定
+    </div>
+</div>
+
+</body></html>

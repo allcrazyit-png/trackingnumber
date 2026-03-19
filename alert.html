@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="zh-Hant"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Noto+Sans+TC:wght@300;400;500;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#135bec",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#101622",
+                        "alert-red": "#dc2626",
+                        "alert-dark": "#450a0a",
+                    },
+                    fontFamily: {
+                        "display": ["Noto Sans TC", "Space Grotesk", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<title>理貨系統 - 錯誤警告狀態</title>
+<style type="text/tailwindcss">
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-alert-red font-display text-white overflow-x-hidden min-h-screen">
+<div class="relative flex min-h-screen w-full flex-col">
+<div class="flex h-full grow flex-col">
+<header class="flex items-center justify-between whitespace-nowrap border-b border-white/20 px-10 py-4 bg-alert-dark/40 backdrop-blur-md sticky top-0 z-50">
+<div class="flex items-center gap-4">
+<div class="size-8 bg-white text-alert-red rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined font-bold">warning</span>
+</div>
+<h2 class="text-xl font-bold leading-tight tracking-tight uppercase">理貨系統 — 緊急狀態</h2>
+</div>
+<div class="flex flex-1 justify-end gap-6 items-center">
+<div class="flex gap-3">
+<button class="flex items-center justify-center rounded-lg h-12 w-12 bg-white/10 hover:bg-white/20 text-white transition-colors">
+<span class="material-symbols-outlined">notifications_active</span>
+</button>
+<button class="flex items-center justify-center rounded-lg h-12 w-12 bg-white/10 hover:bg-white/20 text-white transition-colors">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</div>
+<div class="flex items-center gap-3 pl-6 border-l border-white/20">
+<div class="text-right">
+<p class="text-xs opacity-70 font-medium uppercase tracking-wider">操作員</p>
+<p class="text-sm font-bold">STATION_04</p>
+</div>
+<div class="size-10 rounded-full bg-white/20 border-2 border-white/40 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="User avatar placeholder" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBFAf8ui6m9Tok62CCjamX7C86ZU5FCURhVb0IdEaxWIeZeci3nmnF5x2Pcu_Xu2NOtUfZlvEZBKwTkyNX0sl0dQwe1ezyC2l2pw04EZOWSo3wBVUcAP0mMY3MDCcbbR-mHFij_Bm37wZcjMb1UsXMf2Zv4-aKpxi3MfqCWbm-bO6oI31220K0EGPf2sWK1_ax8j8mX5DZjKp0BOqkB_oewnAdw9wPdmVaDS1lPH_zTeOvrH6aw7gd8MSNeSk2f39lKWeEIUwo9Fr8"/>
+</div>
+</div>
+</div>
+</header>
+<main class="flex-1 flex flex-col px-10 py-8 max-w-[1600px] mx-auto w-full gap-8">
+<div class="grid grid-cols-12 gap-6 items-center">
+<div class="col-span-12 lg:col-span-4 bg-alert-dark rounded-xl p-6 border-2 border-white/30 flex flex-col justify-center items-center shadow-2xl">
+<p class="text-sm font-bold tracking-widest uppercase mb-4 opacity-80">事故發生時長</p>
+<div class="flex gap-4">
+<div class="flex flex-col items-center">
+<div class="bg-white/10 rounded-lg w-20 h-20 flex items-center justify-center border border-white/20">
+<span class="text-4xl font-bold">00</span>
+</div>
+<span class="text-xs mt-2 uppercase font-bold tracking-wider">小時</span>
+</div>
+<div class="text-4xl font-bold flex items-center mb-6">:</div>
+<div class="flex flex-col items-center">
+<div class="bg-white/10 rounded-lg w-20 h-20 flex items-center justify-center border border-white/20">
+<span class="text-4xl font-bold">04</span>
+</div>
+<span class="text-xs mt-2 uppercase font-bold tracking-wider">分</span>
+</div>
+<div class="text-4xl font-bold flex items-center mb-6">:</div>
+<div class="flex flex-col items-center">
+<div class="bg-white/10 rounded-lg w-20 h-20 flex items-center justify-center border border-white/20">
+<span class="text-4xl font-bold text-yellow-400">18</span>
+</div>
+<span class="text-xs mt-2 uppercase font-bold tracking-wider">秒</span>
+</div>
+</div>
+</div>
+<div class="col-span-12 lg:col-span-8 bg-white text-alert-red rounded-xl p-8 flex flex-col justify-center shadow-2xl relative overflow-hidden">
+<div class="absolute top-0 right-0 p-4 opacity-10">
+<span class="material-symbols-outlined text-[120px]">error</span>
+</div>
+<div class="flex items-center gap-4 mb-2">
+<span class="material-symbols-outlined text-4xl font-bold">report_problem</span>
+<h1 class="text-4xl font-black uppercase tracking-tighter">緊急：數量不符</h1>
+</div>
+<p class="text-xl font-bold opacity-90 max-w-2xl">
+                        偵測到托盤 #882 中有 14 個額外單位。實際數量與系統清單不符。 
+                        <span class="font-black underline">系統已鎖定。</span>
+</p>
+</div>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+<div class="bg-alert-dark/60 backdrop-blur-sm border border-white/10 rounded-xl p-6">
+<p class="text-white/60 text-sm font-bold uppercase tracking-wider mb-2">當前批次</p>
+<p class="text-3xl font-bold">B-9902-X</p>
+<div class="mt-4 flex items-center gap-2 text-yellow-400">
+<span class="material-symbols-outlined text-sm">pause_circle</span>
+<span class="text-sm font-bold uppercase">生產暫停</span>
+</div>
+</div>
+<div class="bg-alert-dark/60 backdrop-blur-sm border border-white/10 rounded-xl p-6">
+<p class="text-white/60 text-sm font-bold uppercase tracking-wider mb-2">預期數量</p>
+<p class="text-3xl font-bold">144 <span class="text-sm opacity-50">單位</span></p>
+<div class="mt-4 h-2 bg-white/10 rounded-full overflow-hidden">
+<div class="w-full h-full bg-white"></div>
+</div>
+</div>
+<div class="bg-alert-dark/60 backdrop-blur-sm border border-white/10 rounded-xl p-6 border-l-4 border-l-yellow-400">
+<p class="text-white/60 text-sm font-bold uppercase tracking-wider mb-2">偵測數量</p>
+<p class="text-3xl font-bold text-yellow-400">158 <span class="text-sm opacity-50">單位</span></p>
+<div class="mt-4 flex items-center gap-1 text-yellow-400">
+<span class="material-symbols-outlined text-sm">keyboard_double_arrow_up</span>
+<span class="text-sm font-bold">+14 數量不符</span>
+</div>
+</div>
+<div class="bg-alert-dark/60 backdrop-blur-sm border border-white/10 rounded-xl p-6">
+<p class="text-white/60 text-sm font-bold uppercase tracking-wider mb-2">工作站狀態</p>
+<p class="text-3xl font-bold text-red-400 uppercase">緊急臨界</p>
+<div class="mt-4 flex items-center gap-2">
+<div class="size-2 rounded-full bg-red-500 animate-pulse"></div>
+<span class="text-sm font-bold uppercase">需要立即處理</span>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 flex-1">
+<div class="rounded-2xl overflow-hidden flex flex-col border-4 border-alert-dark bg-blue-900/40 relative">
+<div class="absolute inset-0 bg-red-600/30 pointer-events-none"></div>
+<div class="p-6 bg-blue-800/80 flex justify-between items-center border-b border-white/20 relative z-10">
+<div class="flex items-center gap-3">
+<div class="size-4 rounded-full bg-blue-400"></div>
+<h3 class="text-xl font-bold uppercase tracking-wide">藍色區域 - A 站</h3>
+</div>
+<span class="bg-red-600 px-3 py-1 rounded text-xs font-black">工作站已封鎖</span>
+</div>
+<div class="flex-1 p-8 flex flex-col items-center justify-center relative z-10">
+<div class="w-full aspect-video rounded-xl bg-black/40 border-2 border-white/10 flex items-center justify-center mb-6 group relative overflow-hidden">
+<img class="absolute inset-0 w-full h-full object-cover opacity-50 grayscale contrast-150" data-alt="CCTV view" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCAuz--7vu0ysxT0CZjPV573tyF4a5Z_MkoIMCdMJqpmTN5DLZ2e0gbbJg-ty_-2RRWncwuXaXr3DsDKyXWlzkcOXls9m7OL5jPsH47IG4FH-rdbrGFZobgUdxhkiL7yP4a7BcHYGGrFHrhFQIwx7Af54Mig-s19XM4EyflGTj0ttqUDPTyehGVz4SKVd9X0uPQp3xkQYsWsc0can6TIKNkQqFyNGZe-4h_aBnH-o6GNK8XsUzj7pYqdn6dA3phkaUP18z5xSNiTUU"/>
+<div class="absolute inset-0 bg-alert-red/20"></div>
+<span class="material-symbols-outlined text-8xl text-white/20">videocam_off</span>
+<div class="absolute bottom-4 left-4 bg-black/60 px-3 py-1 rounded text-xs flex items-center gap-2 uppercase">
+<div class="size-2 bg-red-500 rounded-full"></div> 即時畫面：已中斷
+                            </div>
+</div>
+<div class="w-full grid grid-cols-2 gap-4">
+<button class="py-4 bg-white text-alert-red font-black rounded-lg uppercase tracking-tighter text-lg hover:bg-slate-100">
+                                重新清點項目
+                            </button>
+<button class="py-4 bg-alert-dark text-white font-black rounded-lg uppercase tracking-tighter text-lg border border-white/20 hover:bg-alert-dark/80">
+                                請求主管協助
+                            </button>
+</div>
+</div>
+</div>
+<div class="rounded-2xl overflow-hidden flex flex-col border-4 border-alert-dark bg-orange-900/40 relative opacity-60">
+<div class="absolute inset-0 bg-red-600/30 pointer-events-none"></div>
+<div class="p-6 bg-orange-800/80 flex justify-between items-center border-b border-white/20 relative z-10">
+<div class="flex items-center gap-3">
+<div class="size-4 rounded-full bg-orange-400"></div>
+<h3 class="text-xl font-bold uppercase tracking-wide">橘色區域 - B 站</h3>
+</div>
+<span class="bg-slate-800/80 px-3 py-1 rounded text-xs font-black uppercase">待機中</span>
+</div>
+<div class="flex-1 p-8 flex flex-col items-center justify-center relative z-10">
+<div class="w-full aspect-video rounded-xl bg-black/40 border-2 border-white/10 flex items-center justify-center mb-6 grayscale">
+<img class="absolute inset-0 w-full h-full object-cover opacity-30" data-alt="CCTV view" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCC5RdHBVGz0J2RfLFWh-4GD1_Qa38GP7KgdTdniVLNt8oCZj8fLTbhu9OtNuiiacbAWNe2ayFNHozFyfLe8AtkIztjLYBX9iGyhp3T_6HLWK2WIDWQK_Lywg9D0Efc20bIjWkCy1YTy3KaBwNc2XLa_OuZcflhRhQTrTiHJF6nMFnQN-l5FzjA9iK8y-OixA5BPok6bKYsFFtWx_mtPttvzMnn9PVh24nGnfwkoyH7tDB55oNsRNOLz_bXDQIzOdiS6xsQ1cyQ3c8"/>
+<span class="material-symbols-outlined text-8xl text-white/10">motion_sensor_active</span>
+</div>
+<div class="w-full text-center">
+<p class="text-lg font-bold opacity-70 uppercase">B 站因區域警報已暫停</p>
+</div>
+</div>
+</div>
+</div>
+<div class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-alert-dark/80 backdrop-blur-xl">
+<div class="max-w-2xl w-full bg-white rounded-2xl shadow-[0_0_100px_rgba(0,0,0,0.5)] overflow-hidden">
+<div class="bg-alert-red p-8 flex flex-col items-center text-center text-white">
+<div class="size-24 rounded-full bg-white text-alert-red flex items-center justify-center mb-6 shadow-xl">
+<span class="material-symbols-outlined text-6xl font-black">gavel</span>
+</div>
+<h2 class="text-4xl font-black uppercase tracking-tighter mb-4">需要人工驗證</h2>
+<p class="text-xl font-medium opacity-90 leading-relaxed">
+                            偵測到數量不符。自動化系統已停止以策安全。
+                        </p>
+</div>
+<div class="p-10 bg-slate-50">
+<div class="space-y-6">
+<div class="flex items-center gap-4 p-4 bg-white border-2 border-slate-200 rounded-xl">
+<div class="size-12 rounded-lg bg-slate-100 flex items-center justify-center text-slate-400">
+<span class="material-symbols-outlined">inventory_2</span>
+</div>
+<div class="flex-1">
+<p class="text-xs font-black text-slate-400 uppercase">品號</p>
+<p class="text-lg font-bold text-slate-900">NX-7704-B (散熱器組件)</p>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-6">
+<div class="p-4 bg-white border-2 border-slate-200 rounded-xl">
+<p class="text-xs font-black text-slate-400 uppercase">系統數量</p>
+<p class="text-3xl font-black text-slate-900">144</p>
+</div>
+<div class="p-4 bg-red-50 border-2 border-alert-red rounded-xl">
+<p class="text-xs font-black text-alert-red uppercase">實際感測數量</p>
+<p class="text-3xl font-black text-alert-red">158</p>
+</div>
+</div>
+</div>
+<div class="mt-10 flex flex-col gap-4">
+<button class="w-full py-5 bg-alert-red hover:bg-red-700 text-white font-black text-xl rounded-xl uppercase tracking-widest shadow-lg shadow-red-200 transition-all active:scale-95">
+                                確認並手動重新計數
+                            </button>
+<button class="w-full py-4 text-slate-500 font-bold hover:text-slate-800 transition-colors uppercase tracking-widest">
+                                取消並記錄為誤報
+                            </button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<footer class="bg-alert-dark px-10 py-3 flex justify-between items-center text-[10px] font-bold uppercase tracking-[0.2em] opacity-60">
+<div class="flex gap-6">
+<span>終端機: T-0992</span>
+<span>協定: ISO-2200-ERP</span>
+<span>網路: 安全加密</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="size-1.5 rounded-full bg-red-500"></div>
+                系統警告中
+            </div>
+</footer>
+</div>
+</div>
+
+</body></html>
