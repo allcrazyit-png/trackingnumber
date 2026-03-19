@@ -56,12 +56,24 @@
     header {
       display: flex;
       align-items: center;
-      gap: 20px;
-      padding: 12px 28px;
+      gap: 12px;
+      padding: 10px 16px;
       background: rgba(11,20,36,0.95);
       border-bottom: 1px solid var(--border);
       backdrop-filter: blur(8px);
       position: sticky; top: 0; z-index: 10;
+      flex-wrap: wrap;
+    }
+
+    @media (max-width: 640px) {
+      header { gap: 8px; padding: 8px 12px; }
+      .logo span:not(.logo-icon) { display: none; }
+      .divider { display: none; }
+      .scan-counter { display: none; }
+      .ref-pill { min-width: 0; flex: 1; }
+      .ref-pill-label { display: none; }
+      #ref-display { font-size: 1rem; }
+      #btn-reset { padding: 6px 10px; font-size: 0.75rem; }
     }
 
     .logo {
