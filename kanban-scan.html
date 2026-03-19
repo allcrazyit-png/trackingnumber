@@ -413,14 +413,15 @@
       flex: 1;
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
-      padding: 40px;
-      gap: 40px;
+      padding: 24px 16px;
+      gap: 24px;
       position: relative;
+      overflow-y: auto;
     }
 
     .alert-headline {
       font-family: 'Rajdhani', sans-serif;
-      font-size: 5rem; font-weight: 700;
+      font-size: clamp(2.5rem, 10vw, 5rem); font-weight: 700;
       color: var(--red);
       letter-spacing: 4px; text-transform: uppercase;
       text-align: center;
@@ -428,16 +429,18 @@
     }
 
     .alert-codes {
-      display: grid;
-      grid-template-columns: 1fr auto 1fr;
-      gap: 20px; align-items: center;
-      width: 100%; max-width: 900px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: center;
+      width: 100%; max-width: 600px;
     }
     .alert-code-box {
       border: 2px solid;
       border-radius: 12px;
-      padding: 24px 32px;
+      padding: 16px 20px;
       text-align: center;
+      width: 100%;
     }
     .alert-code-box.expected {
       border-color: rgba(255,255,255,0.2);
@@ -451,32 +454,35 @@
       font-family: 'Rajdhani', sans-serif;
       font-size: 0.7rem; font-weight: 700;
       letter-spacing: 3px; text-transform: uppercase;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
     .expected .alert-code-label { color: rgba(255,255,255,0.4); }
     .wrong .alert-code-label    { color: var(--red); }
     .alert-code-val {
       font-family: 'JetBrains Mono', monospace;
-      font-weight: 800; font-size: 2rem;
-      letter-spacing: 3px;
+      font-weight: 800;
+      font-size: clamp(1.2rem, 5vw, 2rem);
+      letter-spacing: 2px;
+      word-break: break-all;
     }
     .expected .alert-code-val { color: #e8edf5; }
     .wrong .alert-code-val    { color: var(--red); text-shadow: 0 0 20px rgba(255,23,68,0.5); }
 
     .alert-vs {
       font-family: 'Rajdhani', sans-serif;
-      font-size: 1.5rem; font-weight: 700;
+      font-size: 1.2rem; font-weight: 700;
       color: var(--muted); letter-spacing: 2px;
     }
 
     #btn-resolve {
-      padding: 18px 60px;
+      padding: 16px 32px;
+      width: 100%; max-width: 600px;
       background: transparent;
       border: 2px solid rgba(255,23,68,0.5);
       border-radius: 10px;
       color: var(--red);
       font-family: 'Rajdhani', sans-serif;
-      font-size: 1.2rem; font-weight: 700;
+      font-size: clamp(0.9rem, 4vw, 1.2rem); font-weight: 700;
       letter-spacing: 3px; text-transform: uppercase;
       cursor: pointer;
       transition: all 0.2s;
@@ -487,6 +493,11 @@
       box-shadow: 0 0 30px rgba(255,23,68,0.2);
     }
     #btn-resolve:active { transform: scale(0.97); }
+
+    @media (max-width: 640px) {
+      .alert-header { padding: 12px 16px; }
+      .alert-header-title { font-size: 0.7rem; letter-spacing: 2px; }
+    }
   </style>
 </head>
 
@@ -714,15 +725,26 @@
     }
 
     // ── 警報 ──────────────────────────────────────────────
+    let alertSoundInterval = null;
+
     function triggerAlert(wrongProduct) {
       Els.alertExpected.textContent = state.ref;
       Els.alertScanned.textContent  = wrongProduct;
       Els.alertView.classList.remove('hidden');
       Els.mainView.classList.add('hidden');
       playAlertSound();
+      alertSoundInterval = setInterval(playAlertSound, 2000);
+    }
+
+    function stopAlertSound() {
+      if (alertSoundInterval) {
+        clearInterval(alertSoundInterval);
+        alertSoundInterval = null;
+      }
     }
 
     el('btn-resolve').onclick = () => {
+      stopAlertSound();
       Els.alertView.classList.add('hidden');
       Els.mainView.classList.remove('hidden');
       Els.input.focus();
