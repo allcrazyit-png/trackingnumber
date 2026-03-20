@@ -855,6 +855,7 @@
         } else {
           // 數量已達標或無預期數量，自動換批次
           addHistory(product, kindLabel, kind, 'set');
+          beepBatchComplete();
           startNewBatch(product, kind, kindLabel, qty);
         }
       }
@@ -1034,6 +1035,24 @@
         gain.gain.setValueAtTime(0.2, ctx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
         osc.start(); osc.stop(ctx.currentTime + 0.3);
+      } catch (e) {}
+    }
+
+    function beepBatchComplete() {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        // 三音上升：Do Mi Sol — 表示完成切換
+        [523, 659, 784].forEach((freq, i) => {
+          const osc  = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain); gain.connect(ctx.destination);
+          osc.frequency.value = freq;
+          osc.type = 'sine';
+          const t = ctx.currentTime + i * 0.18;
+          gain.gain.setValueAtTime(0.3, t);
+          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
+          osc.start(t); osc.stop(t + 0.28);
+        });
       } catch (e) {}
     }
 
