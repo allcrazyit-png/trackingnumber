@@ -241,18 +241,27 @@
     /* ── PRINT ──────────────────────────────── */
     #print-area{display:none;}
     @media print{
+      @page{margin:4mm;}
       body>*:not(#print-area){display:none!important;}
-      #print-area{display:block!important;}
-      .plabel{
-        width:9cm;height:6cm;page-break-after:always;
-        display:flex;flex-direction:column;
-        align-items:center;justify-content:center;gap:10px;
-        border:1px solid #ddd;padding:14px;
-        font-family:'JetBrains Mono',monospace;
+      #print-area{
+        display:flex!important;
+        flex-wrap:wrap;
+        gap:3mm;
+        align-content:flex-start;
       }
-      .plabel img{width:3.8cm;height:3.8cm;}
-      .plabel-prod{font-size:17px;font-weight:800;letter-spacing:3px;color:#000;}
-      .plabel-sub{font-size:9px;letter-spacing:2px;color:#888;font-family:Arial,sans-serif;}
+      .plabel{
+        width:2cm;
+        display:flex;flex-direction:column;
+        align-items:center;justify-content:center;gap:1mm;
+        page-break-inside:avoid;
+      }
+      .plabel img{width:2cm;height:2cm;display:block;}
+      .plabel-prod{
+        font-size:5pt;font-weight:800;letter-spacing:0.5px;
+        color:#000;font-family:'JetBrains Mono',monospace;
+        text-align:center;word-break:break-all;line-height:1.3;
+      }
+      .plabel-sub{display:none;}
     }
 
     /* Scrollbar */
@@ -404,7 +413,7 @@
     const canvas = document.getElementById('qr-canvas');
     try {
       await QRCode.toCanvas(canvas, product, {
-        width: 136, margin: 1,
+        width: 300, margin: 1,
         color: { dark: '#000000', light: '#ffffff' }
       });
       curDataURL = canvas.toDataURL();
