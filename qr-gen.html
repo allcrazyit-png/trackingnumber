@@ -276,6 +276,13 @@
       .qr-box{width:120px;height:120px;}
     }
 
+    .qty-btn{
+      width:30px;height:30px;border-radius:6px;border:1px solid var(--border);
+      background:rgba(255,255,255,.05);color:var(--text);font-size:1rem;
+      cursor:pointer;transition:all .15s;
+    }
+    .qty-btn:hover{border-color:var(--cyan);color:var(--cyan);}
+
     #barcode-input{position:fixed;opacity:0;pointer-events:none;width:1px;height:1px;}
   </style>
 </head>
@@ -336,6 +343,16 @@
         <div class="rinfo">
           <div class="rprod-lbl">場內料號</div>
           <div class="rprod" id="rprod">—</div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+            <span style="font-size:0.72rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);">數量</span>
+            <button class="qty-btn" onclick="changeQty(-1)">−</button>
+            <input id="qty-input" type="number" min="1" max="99" value="1"
+              style="width:52px;text-align:center;background:rgba(255,255,255,0.06);
+                     border:1px solid var(--border);border-radius:6px;color:var(--text);
+                     font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:700;
+                     padding:5px;outline:none;">
+            <button class="qty-btn" onclick="changeQty(1)">＋</button>
+          </div>
           <div class="result-actions">
             <button class="btn btn-add" id="btn-add" onclick="addToQueue()">+ 加入佇列</button>
             <button class="btn btn-now" onclick="printOne()">立即列印</button>
@@ -444,10 +461,23 @@
   }
 
   // ── 佇列操作 ──────────────────────────
+  function getQty() {
+    const v = parseInt(document.getElementById('qty-input').value) || 1;
+    return Math.min(Math.max(v, 1), 99);
+  }
+
+  function changeQty(delta) {
+    const el = document.getElementById('qty-input');
+    el.value = Math.min(Math.max((parseInt(el.value) || 1) + delta, 1), 99);
+  }
+
   function addToQueue() {
     if (!curProduct || !curDataURL) return;
-    seq++;
-    queue.push({ id: seq, product: curProduct, dataURL: curDataURL });
+    const qty = getQty();
+    for (let i = 0; i < qty; i++) {
+      seq++;
+      queue.push({ id: seq, product: curProduct, dataURL: curDataURL });
+    }
     renderQueue();
     // 視覺回饋
     const btn = document.getElementById('btn-add');
@@ -466,7 +496,9 @@
 
   function printOne() {
     if (!curProduct || !curDataURL) return;
-    doPrint([{ product: curProduct, dataURL: curDataURL }]);
+    const qty = getQty();
+    const items = Array.from({ length: qty }, () => ({ product: curProduct, dataURL: curDataURL }));
+    doPrint(items);
   }
 
   function printItem(id) {
