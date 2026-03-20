@@ -788,21 +788,6 @@
         beep('error'); return;
       }
 
-      state.total++;
-      Els.scanCount.textContent = state.total;
-
-      if (kind === 'internal') {
-        state.countInternal++;
-        Els.countInternal.textContent = state.countInternal;
-        Els.ghostInternal.textContent = state.countInternal;
-        bumpCounter(Els.countInternal);
-      } else {
-        state.countCustomer++;
-        Els.countCustomer.textContent = state.countCustomer;
-        Els.ghostCustomer.textContent = state.countCustomer;
-        bumpCounter(Els.countCustomer);
-      }
-
       if (state.ref === null) {
         state.ref = product;
         Els.refDisplay.textContent = product;
@@ -813,6 +798,20 @@
         addHistory(product, kindLabel, kind, 'set');
         beep('ok');
       } else if (product === state.ref) {
+        // 只有正確才計數
+        state.total++;
+        Els.scanCount.textContent = state.total;
+        if (kind === 'internal') {
+          state.countInternal++;
+          Els.countInternal.textContent = state.countInternal;
+          Els.ghostInternal.textContent = state.countInternal;
+          bumpCounter(Els.countInternal);
+        } else {
+          state.countCustomer++;
+          Els.countCustomer.textContent = state.countCustomer;
+          Els.ghostCustomer.textContent = state.countCustomer;
+          bumpCounter(Els.countCustomer);
+        }
         const suffix = t('kindSuffix') ? `${kindLabel}${t('kindSuffix')}` : kindLabel;
         setCard('ok', t('matchOk'), `${suffix} · ${product}`, 'MATCH OK');
         addHistory(product, kindLabel, kind, 'ok');
