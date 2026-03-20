@@ -687,9 +687,9 @@
         badgeInternal:'場內', badgeCustomer:'客戶',
         resOk:'✓ 一致', resSet:'● 基準', resError:'✗ 不符',
         kindInternal:'場內', kindCustomer:'客戶', kindSuffix:'看板',
-        alertSwitchTitle:'⚠ 數量未完成 — 批次切換警告',
-        alertSwitchHeadline:'數量未達標', alertActualLabel:'已完成張數',
-        alertExpectedQtyLabel:'應出張數', alertNewProductLabel:'新批次番號',
+        alertSwitchTitle:'⚠ 數量不一致 — 批次切換警告',
+        alertSwitchHeadline:'兩邊張數不符', alertActualLabel:'場內張數',
+        alertExpectedQtyLabel:'客戶張數', alertNewProductLabel:'新批次番號',
         btnSwitchConfirm:'確認換批次', alertResolveSwitch:'返回繼續',
       },
       vi: {
@@ -708,9 +708,9 @@
         badgeInternal:'NB', badgeCustomer:'KH',
         resOk:'✓ Khớp', resSet:'● Chuẩn', resError:'✗ Sai',
         kindInternal:'Nội bộ', kindCustomer:'Khách hàng', kindSuffix:'',
-        alertSwitchTitle:'⚠ SỐ LƯỢNG CHƯA ĐỦ — Cảnh báo đổi lô',
-        alertSwitchHeadline:'Số lượng chưa đạt', alertActualLabel:'Đã hoàn thành',
-        alertExpectedQtyLabel:'Số lượng yêu cầu', alertNewProductLabel:'Mã lô mới',
+        alertSwitchTitle:'⚠ SỐ LƯỢNG KHÔNG KHỚP — Cảnh báo đổi lô',
+        alertSwitchHeadline:'Số lượng 2 bên không khớp', alertActualLabel:'Kanban nội bộ',
+        alertExpectedQtyLabel:'Kanban khách hàng', alertNewProductLabel:'Mã lô mới',
         btnSwitchConfirm:'Xác nhận đổi lô', alertResolveSwitch:'Quay lại tiếp tục',
       },
       id: {
@@ -729,9 +729,9 @@
         badgeInternal:'INT', badgeCustomer:'CUST',
         resOk:'✓ Sesuai', resSet:'● Referensi', resError:'✗ Tidak sesuai',
         kindInternal:'Internal', kindCustomer:'Pelanggan', kindSuffix:'',
-        alertSwitchTitle:'⚠ JUMLAH BELUM CUKUP — Peringatan ganti batch',
-        alertSwitchHeadline:'Jumlah belum tercapai', alertActualLabel:'Sudah selesai',
-        alertExpectedQtyLabel:'Jumlah yang diminta', alertNewProductLabel:'Kode batch baru',
+        alertSwitchTitle:'⚠ JUMLAH TIDAK SESUAI — Peringatan ganti batch',
+        alertSwitchHeadline:'Jumlah 2 sisi tidak cocok', alertActualLabel:'Kanban Internal',
+        alertExpectedQtyLabel:'Kanban Pelanggan', alertNewProductLabel:'Kode batch baru',
         btnSwitchConfirm:'Konfirmasi ganti batch', alertResolveSwitch:'Kembali lanjutkan',
       },
     };
@@ -847,17 +847,15 @@
         addHistory(product, kindLabel, kind, 'ok');
         beep('ok');
       } else {
-        // 不同番號出現 — 判斷是否需要換批次
-        const actual   = state.total;
-        const expected = state.expectedQty;
-        if (expected !== null && actual !== expected) {
-          // 數量未達標，跳警告
+        // 不同番號出現 — 場內張數必須等於客戶張數才能換批
+        if (state.countInternal !== state.countCustomer) {
+          // 兩邊不一致，跳警告
           addHistory(product, kindLabel, kind, 'error');
           beep('error');
           state.pendingSwitch = { product, kind, kindLabel, qty };
-          triggerSwitchAlert(actual, expected, product);
+          triggerSwitchAlert(state.countInternal, state.countCustomer, product);
         } else {
-          // 數量已達標或無預期數量，自動換批次
+          // 兩邊一致，自動換批次
           startNewBatch(product, kind, kindLabel, qty, 'batch');
         }
       }
@@ -899,8 +897,10 @@
       state.expectedQty = qty;
       Els.refDisplay.textContent = qty ? `${product} ×${qty}` : product;
       Els.refDisplay.classList.remove('empty');
-      state.total = 0;
-      Els.scanCount.textContent = qty ? `0/${qty}` : '0';
+      // 第一張計入 1
+      state.total = 1;
+      updateCountDisplay(kind);
+      Els.scanCount.textContent = '1';
       Els.dotText.textContent = t('comparing');
       const suffix = t('kindSuffix') ? `${kindLabel}${t('kindSuffix')}` : kindLabel;
       setCard('set', t('refSet'), `${suffix} · ${product}`, 'LOCKED');
