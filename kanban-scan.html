@@ -150,6 +150,17 @@
     }
     #btn-reset:hover { border-color: var(--red); color: var(--red); }
 
+    /* Lang switcher */
+    .lang-switcher { display:flex; gap:4px; margin-left:8px; }
+    .lang-btn {
+      padding:5px 10px; border-radius:6px; font-size:0.72rem; font-weight:700;
+      letter-spacing:1px; cursor:pointer; border:1px solid var(--border);
+      background:transparent; color:var(--muted); font-family:'Rajdhani',sans-serif;
+      transition:all .2s;
+    }
+    .lang-btn:hover { border-color:rgba(255,255,255,.2); color:var(--text); }
+    .lang-btn.active { border-color:var(--cyan); color:var(--cyan); background:rgba(0,200,255,.08); }
+
     /* ═══════════════════════════════════════════
        MAIN
     ═══════════════════════════════════════════ */
@@ -510,26 +521,26 @@
     <header>
       <div class="logo">
         <div class="logo-icon">KB</div>
-        看板比對
+        <span id="t-logo">看板比對</span>
       </div>
 
       <div class="divider"></div>
 
       <div class="ref-pill">
-        <span class="ref-pill-label">基準料號</span>
+        <span class="ref-pill-label" id="t-refLabel">基準料號</span>
         <span id="ref-display" class="empty">尚未掃描</span>
       </div>
 
       <div class="scan-counter">
         <span class="scan-counter-val" id="scan-count">0</span>
-        <span class="scan-counter-lbl">已掃張數</span>
+        <span class="scan-counter-lbl" id="t-scanLbl">已掃張數</span>
       </div>
 
       <div class="divider"></div>
 
       <button id="btn-reset">⟳ 重置 <span style="opacity:.5;font-size:.8em">ESC</span></button>
 
-      <a href="qr-gen.html" style="margin-left:8px;padding:8px 16px;border:1px solid rgba(0,200,255,0.3);
+      <a id="qr-link" href="qr-gen.html" style="margin-left:8px;padding:8px 16px;border:1px solid rgba(0,200,255,0.3);
          border-radius:8px;color:var(--cyan);font-family:'Rajdhani',sans-serif;font-size:0.8rem;
          font-weight:700;letter-spacing:2px;text-transform:uppercase;text-decoration:none;
          white-space:nowrap;transition:all .2s;"
@@ -537,6 +548,12 @@
          onmouseout="this.style.background=''">
         QR 產生器 →
       </a>
+
+      <div class="lang-switcher">
+        <button class="lang-btn active" onclick="applyLang('zh')">中文</button>
+        <button class="lang-btn" onclick="applyLang('vi')">VI</button>
+        <button class="lang-btn" onclick="applyLang('id')">ID</button>
+      </div>
     </header>
 
     <main>
@@ -551,14 +568,14 @@
       <div class="counters">
         <div class="counter-panel internal">
           <div class="counter-label internal">
-            <span class="counter-dot"></span>場內看板
+            <span class="counter-dot"></span><span id="t-internalLabel">場內看板</span>
           </div>
           <div class="counter-num" id="count-internal">0</div>
           <div class="counter-ghost" id="ghost-internal">0</div>
         </div>
         <div class="counter-panel customer">
           <div class="counter-label customer">
-            <span class="counter-dot"></span>客戶看板
+            <span class="counter-dot"></span><span id="t-customerLabel">客戶看板</span>
           </div>
           <div class="counter-num" id="count-customer">0</div>
           <div class="counter-ghost" id="ghost-customer">0</div>
@@ -568,16 +585,16 @@
       <!-- History -->
       <div class="history-panel">
         <div class="history-head">
-          <span class="history-head-title">掃描記錄</span>
-          <span style="font-family:'Rajdhani',sans-serif;font-size:.65rem;color:var(--muted);letter-spacing:2px">最近 10 筆</span>
+          <span class="history-head-title" id="t-historyTitle">掃描記錄</span>
+          <span id="t-historyRecent" style="font-family:'Rajdhani',sans-serif;font-size:.65rem;color:var(--muted);letter-spacing:2px">最近 10 筆</span>
         </div>
         <table>
           <thead>
             <tr>
-              <th style="width:90px">時間</th>
-              <th style="width:80px">類別</th>
-              <th>料號</th>
-              <th style="width:80px;text-align:right">結果</th>
+              <th id="t-thTime" style="width:90px">時間</th>
+              <th id="t-thType" style="width:80px">類別</th>
+              <th id="t-thCode">料號</th>
+              <th id="t-thResult" style="width:80px;text-align:right">結果</th>
             </tr>
           </thead>
           <tbody id="scan-history">
@@ -591,7 +608,7 @@
       <span>看板比對系統 v1.0 · <span id="last-raw" style="color:var(--cyan)">---</span></span>
       <div class="footer-right">
         <span id="status-dot-text">系統就緒</span>
-        <span>掃描槍鎖定中</span>
+        <span id="t-scannerLocked">掃描槍鎖定中</span>
       </div>
     </footer>
   </div>
@@ -600,28 +617,113 @@
   <div id="alert-view" class="hidden">
     <div class="alert-header">
       <div class="alert-blink"></div>
-      <span class="alert-header-title">⚠ MISMATCH DETECTED — 料號不符警報</span>
+      <span class="alert-header-title" id="t-alertTitle">⚠ MISMATCH DETECTED — 料號不符警報</span>
     </div>
     <div class="alert-main">
-      <div class="alert-headline">料號不符</div>
+      <div class="alert-headline" id="t-alertHeadline">料號不符</div>
       <div class="alert-codes">
         <div class="alert-code-box expected">
-          <div class="alert-code-label">基準料號（正確）</div>
+          <div class="alert-code-label" id="t-alertExpectedLabel">基準料號（正確）</div>
           <div class="alert-code-val" id="alert-expected">---</div>
         </div>
         <div class="alert-vs">≠</div>
         <div class="alert-code-box wrong">
-          <div class="alert-code-label">掃到的料號（錯誤）</div>
+          <div class="alert-code-label" id="t-alertWrongLabel">掃到的料號（錯誤）</div>
           <div class="alert-code-val" id="alert-scanned">---</div>
         </div>
       </div>
-      <button id="btn-resolve">確認處理完畢，解除警報</button>
+      <button id="btn-resolve"><span id="t-alertResolve">確認處理完畢，解除警報</span></button>
     </div>
   </div>
 
   <script>
     // ── 設定 ─────────────────────────────────────────────
     const INTERNAL_PREFIX = 'RAY:';
+
+    // ── 多語言 ────────────────────────────────────────────
+    const LANGS = {
+      zh: {
+        logo:'看板比對', refLabel:'基準料號', refEmpty:'尚未掃描',
+        scanLbl:'已掃張數', resetBtn:'⟳ 重置', qrLink:'QR 產生器 →',
+        statusIdle:'請掃描看板', statusIdleSub:'客戶看板或場內看板皆可先掃',
+        internalLabel:'場內看板', customerLabel:'客戶看板',
+        historyTitle:'掃描記錄', historyRecent:'最近 10 筆',
+        thTime:'時間', thType:'類別', thCode:'料號', thResult:'結果',
+        historyEmpty:'尚無記錄', scannerLocked:'掃描槍鎖定中',
+        alertTitle:'⚠ MISMATCH DETECTED — 料號不符警報',
+        alertHeadline:'料號不符', alertExpectedLabel:'基準料號（正確）',
+        alertWrongLabel:'掃到的料號（錯誤）', alertResolve:'確認處理完畢，解除警報',
+        sysReady:'系統就緒', comparing:'比對中',
+        refSet:'基準已設定', matchOk:'料號一致', noExtract:'無法擷取料號',
+        badgeInternal:'場內', badgeCustomer:'客戶',
+        resOk:'✓ 一致', resSet:'● 基準', resError:'✗ 不符',
+        kindInternal:'場內', kindCustomer:'客戶', kindSuffix:'看板',
+      },
+      vi: {
+        logo:'So Sánh Kanban', refLabel:'Mã Chuẩn', refEmpty:'Chưa quét',
+        scanLbl:'Đã quét', resetBtn:'⟳ Đặt lại', qrLink:'Tạo QR →',
+        statusIdle:'Vui lòng quét Kanban', statusIdleSub:'Có thể quét kanban khách hàng hoặc nội bộ trước',
+        internalLabel:'Kanban Nội bộ', customerLabel:'Kanban Khách hàng',
+        historyTitle:'Lịch sử quét', historyRecent:'10 gần nhất',
+        thTime:'Thời gian', thType:'Loại', thCode:'Mã hàng', thResult:'Kết quả',
+        historyEmpty:'Chưa có dữ liệu', scannerLocked:'Máy quét sẵn sàng',
+        alertTitle:'⚠ CẢNH BÁO — Mã hàng không khớp',
+        alertHeadline:'Mã hàng không khớp', alertExpectedLabel:'Mã chuẩn (đúng)',
+        alertWrongLabel:'Mã vừa quét (sai)', alertResolve:'Xác nhận đã xử lý, tắt cảnh báo',
+        sysReady:'Hệ thống sẵn sàng', comparing:'Đang so sánh',
+        refSet:'Đã thiết lập chuẩn', matchOk:'Mã hàng khớp', noExtract:'Không đọc được mã',
+        badgeInternal:'NB', badgeCustomer:'KH',
+        resOk:'✓ Khớp', resSet:'● Chuẩn', resError:'✗ Sai',
+        kindInternal:'Nội bộ', kindCustomer:'Khách hàng', kindSuffix:'',
+      },
+      id: {
+        logo:'Verifikasi Kanban', refLabel:'Kode Referensi', refEmpty:'Belum discan',
+        scanLbl:'Sudah discan', resetBtn:'⟳ Reset', qrLink:'Buat QR →',
+        statusIdle:'Silakan scan Kanban', statusIdleSub:'Bisa scan kanban pelanggan atau internal lebih dulu',
+        internalLabel:'Kanban Internal', customerLabel:'Kanban Pelanggan',
+        historyTitle:'Riwayat Scan', historyRecent:'10 terbaru',
+        thTime:'Waktu', thType:'Tipe', thCode:'Kode', thResult:'Hasil',
+        historyEmpty:'Belum ada data', scannerLocked:'Scanner terkunci',
+        alertTitle:'⚠ PERINGATAN — Kode tidak sesuai',
+        alertHeadline:'Kode tidak sesuai', alertExpectedLabel:'Kode referensi (benar)',
+        alertWrongLabel:'Kode hasil scan (salah)', alertResolve:'Konfirmasi selesai, matikan peringatan',
+        sysReady:'Sistem siap', comparing:'Membandingkan',
+        refSet:'Referensi ditetapkan', matchOk:'Kode sesuai', noExtract:'Kode tidak terbaca',
+        badgeInternal:'INT', badgeCustomer:'CUST',
+        resOk:'✓ Sesuai', resSet:'● Referensi', resError:'✗ Tidak sesuai',
+        kindInternal:'Internal', kindCustomer:'Pelanggan', kindSuffix:'',
+      },
+    };
+
+    let currentLang = 'zh';
+    const t = k => (LANGS[currentLang] || LANGS.zh)[k] || k;
+
+    function applyLang(lang) {
+      currentLang = lang;
+      const L = LANGS[lang];
+      // Update language buttons
+      document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.textContent.toLowerCase() === lang ||
+          (lang === 'zh' && btn.textContent === '中文'));
+      });
+      // Update static elements
+      const ids = ['logo','refLabel','scanLbl','internalLabel','customerLabel',
+                   'historyTitle','historyRecent','thTime','thType','thCode','thResult',
+                   'scannerLocked','alertTitle','alertHeadline','alertExpectedLabel',
+                   'alertWrongLabel','alertResolve'];
+      ids.forEach(k => { const el = document.getElementById('t-'+k); if(el) el.textContent = L[k]; });
+      document.getElementById('btn-reset').innerHTML =
+        `${L.resetBtn} <span style="opacity:.5;font-size:.8em">ESC</span>`;
+      document.getElementById('qr-link').textContent = L.qrLink;
+      // Update current state text
+      if (!state.ref) {
+        Els.refDisplay.textContent = L.refEmpty;
+        Els.dotText.textContent    = L.sysReady;
+        setCard('idle', L.statusIdle, L.statusIdleSub, 'STANDBY');
+        if (Els.historyBody.querySelector('[colspan]'))
+          Els.historyBody.innerHTML = `<tr><td colspan="4" style="padding:24px;text-align:center;color:var(--muted);font-style:italic">${L.historyEmpty}</td></tr>`;
+      }
+    }
     // ─────────────────────────────────────────────────────
 
     const state = { ref: null, total: 0, countInternal: 0, countCustomer: 0 };
@@ -678,10 +780,10 @@
       }
 
       const { kind, product } = extractProduct(raw);
-      const kindLabel = kind === 'customer' ? '客戶' : '場內';
+      const kindLabel = kind === 'customer' ? t('kindCustomer') : t('kindInternal');
 
       if (!product) {
-        setCard('idle', '無法擷取料號', `條碼格式不符：${raw.slice(0, 30)}`, 'ERROR');
+        setCard('idle', t('noExtract'), `${raw.slice(0, 30)}`, 'ERROR');
         beep('error'); return;
       }
 
@@ -704,12 +806,14 @@
         state.ref = product;
         Els.refDisplay.textContent = product;
         Els.refDisplay.classList.remove('empty');
-        Els.dotText.textContent = '比對中';
-        setCard('set', '基準已設定', `${kindLabel}看板 · ${product}`, 'LOCKED');
+        Els.dotText.textContent = t('comparing');
+        const suffix = t('kindSuffix') ? `${kindLabel}${t('kindSuffix')}` : kindLabel;
+        setCard('set', t('refSet'), `${suffix} · ${product}`, 'LOCKED');
         addHistory(product, kindLabel, kind, 'set');
         beep('ok');
       } else if (product === state.ref) {
-        setCard('ok', '料號一致', `${kindLabel}看板 · ${product}`, 'MATCH OK');
+        const suffix = t('kindSuffix') ? `${kindLabel}${t('kindSuffix')}` : kindLabel;
+        setCard('ok', t('matchOk'), `${suffix} · ${product}`, 'MATCH OK');
         addHistory(product, kindLabel, kind, 'ok');
         beep('ok');
       } else {
@@ -768,12 +872,12 @@
       Els.countCustomer.textContent   = '0';
       Els.ghostInternal.textContent   = '0';
       Els.ghostCustomer.textContent   = '0';
-      Els.refDisplay.innerHTML        = '尚未掃描';
+      Els.refDisplay.innerHTML        = t('refEmpty');
       Els.refDisplay.className        = 'empty';
-      Els.dotText.textContent         = '系統就緒';
-      Els.historyBody.innerHTML       = '<tr><td colspan="4" style="padding:24px;text-align:center;color:var(--muted);font-style:italic">尚無記錄</td></tr>';
+      Els.dotText.textContent         = t('sysReady');
+      Els.historyBody.innerHTML       = `<tr><td colspan="4" style="padding:24px;text-align:center;color:var(--muted);font-style:italic">${t('historyEmpty')}</td></tr>`;
       Els.lastRaw.textContent         = '---';
-      setCard('idle', '請掃描看板', '客戶看板或場內看板皆可先掃', 'STANDBY');
+      setCard('idle', t('statusIdle'), t('statusIdleSub'), 'STANDBY');
       Els.input.focus();
     }
     el('btn-reset').onclick = doReset;
@@ -782,11 +886,11 @@
     function addHistory(product, kindLabel, kind, result) {
       const now   = new Date().toLocaleTimeString('zh-TW', { hour12: false });
       const badge = kind === 'internal'
-        ? '<span class="badge badge-i">場內</span>'
-        : '<span class="badge badge-c">客戶</span>';
-      const res   = result === 'ok'    ? '<span class="td-result res-ok">✓ 一致</span>'
-                  : result === 'set'   ? '<span class="td-result res-set">● 基準</span>'
-                  : '<span class="td-result res-error">✗ 不符</span>';
+        ? `<span class="badge badge-i">${t('badgeInternal')}</span>`
+        : `<span class="badge badge-c">${t('badgeCustomer')}</span>`;
+      const res   = result === 'ok'  ? `<span class="td-result res-ok">${t('resOk')}</span>`
+                  : result === 'set' ? `<span class="td-result res-set">${t('resSet')}</span>`
+                  : `<span class="td-result res-error">${t('resError')}</span>`;
 
       if (Els.historyBody.querySelector('[colspan]'))
         Els.historyBody.innerHTML = '';
