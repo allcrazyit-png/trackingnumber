@@ -69,10 +69,10 @@
       header { gap: 8px; padding: 8px 12px; }
       .logo span:not(.logo-icon) { display: none; }
       .divider { display: none; }
-      #status-card { padding: 14px 16px; gap: 4px; flex-direction: row; justify-content: space-between; align-items: center; }
-      #status-msg { font-size: 1.4rem; letter-spacing: 1px; }
-      #status-sub { font-size: 0.72rem; letter-spacing: 0; }
-      .status-eyebrow { letter-spacing: 2px; font-size: 0.6rem; }
+      #status-card { padding: 8px 14px; gap: 2px; flex-direction: row; justify-content: space-between; align-items: center; border-radius: 10px; }
+      #status-msg { font-size: 1.1rem; letter-spacing: 0; }
+      #status-sub { font-size: 0.65rem; letter-spacing: 0; max-width: 55vw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .status-eyebrow { display: none; }
       .scan-counter { display: none; }
       .ref-pill { min-width: 0; flex: 1; }
       .ref-pill-label { display: none; }
@@ -891,11 +891,12 @@
 
     function startNewBatch(product, kind, kindLabel, qty, sound = 'ok') {
       state.ref = product;
-      state.total = 0;
-      state.countInternal = 0;
-      state.countCustomer = 0;
       state.expectedQty = qty;
-      Els.refDisplay.textContent = qty ? `${product} ×${qty}` : product;
+      // 兩邊歸零
+      state.total = 0; state.countInternal = 0; state.countCustomer = 0;
+      Els.countInternal.textContent = '0'; Els.ghostInternal.textContent = '0';
+      Els.countCustomer.textContent = '0'; Els.ghostCustomer.textContent = '0';
+      Els.refDisplay.textContent = product;
       Els.refDisplay.classList.remove('empty');
       // 第一張計入 1
       state.total = 1;
