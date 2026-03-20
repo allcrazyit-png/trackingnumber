@@ -924,6 +924,7 @@
       Els.alertScanned.textContent  = wrongProduct;
       Els.alertView.classList.remove('hidden');
       Els.mainView.classList.add('hidden');
+      stopAlertSound();
       playAlertSound();
       alertSoundInterval = setInterval(playAlertSound, 2000);
     }
@@ -941,6 +942,7 @@
       document.getElementById('alert-new-product-val').textContent = newProduct;
       Els.alertView.classList.remove('hidden');
       Els.mainView.classList.add('hidden');
+      stopAlertSound();
       playAlertSound();
       alertSoundInterval = setInterval(playAlertSound, 2000);
     }
