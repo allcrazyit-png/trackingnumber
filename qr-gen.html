@@ -384,6 +384,22 @@
   let queue = [];
   let seq   = 0;
 
+  // ── localStorage ──────────────────────
+  function saveQueue() {
+    try { localStorage.setItem('ray-qr-queue', JSON.stringify(queue)); } catch(e) {}
+  }
+  function loadQueue() {
+    try {
+      const saved = localStorage.getItem('ray-qr-queue');
+      if (saved) {
+        queue = JSON.parse(saved);
+        seq = queue.reduce((m, q) => Math.max(m, q.id), 0);
+        renderQueue();
+      }
+    } catch(e) {}
+  }
+  loadQueue();
+
   // ── 擷取料號 ──────────────────────────
   function extractProduct(raw) {
     if (raw.includes('J004')) {
@@ -495,6 +511,7 @@
 
   function clearAll() {
     queue = [];
+    localStorage.removeItem('ray-qr-queue');
     renderQueue();
   }
 
@@ -513,6 +530,7 @@
   }
 
   function renderQueue() {
+    saveQueue();
     const list  = document.getElementById('qlist');
     const count = document.getElementById('qcount');
     const badge = document.getElementById('qbadge');

@@ -695,11 +695,12 @@
       },
     };
 
-    let currentLang = 'zh';
+    let currentLang = localStorage.getItem('ray-lang') || 'zh';
     const t = k => (LANGS[currentLang] || LANGS.zh)[k] || k;
 
     function applyLang(lang) {
       currentLang = lang;
+      try { localStorage.setItem('ray-lang', lang); } catch(e) {}
       const L = LANGS[lang];
       // Update language buttons
       document.querySelectorAll('.lang-btn').forEach(btn => {
@@ -967,6 +968,7 @@
     });
 
     Els.input.focus();
+    applyLang(currentLang);
   </script>
 </body>
 </html>
