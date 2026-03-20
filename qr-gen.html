@@ -343,19 +343,9 @@
         <div class="rinfo">
           <div class="rprod-lbl">場內料號</div>
           <div class="rprod" id="rprod">—</div>
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-            <span style="font-size:0.72rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);">數量</span>
-            <button class="qty-btn" onclick="changeQty(-1)">−</button>
-            <input id="qty-input" type="number" min="1" max="99" value="1"
-              style="width:52px;text-align:center;background:rgba(255,255,255,0.06);
-                     border:1px solid var(--border);border-radius:6px;color:var(--text);
-                     font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:700;
-                     padding:5px;outline:none;">
-            <button class="qty-btn" onclick="changeQty(1)">＋</button>
-          </div>
           <div class="result-actions">
             <button class="btn btn-add" id="btn-add" onclick="addToQueue()">+ 加入佇列</button>
-            <button class="btn btn-now" onclick="printOne()">立即列印</button>
+            <button class="btn btn-now" onclick="printOne()">立即列印 ×1</button>
           </div>
         </div>
       </div>
@@ -461,23 +451,17 @@
   }
 
   // ── 佇列操作 ──────────────────────────
-  function getQty() {
-    const v = parseInt(document.getElementById('qty-input').value) || 1;
-    return Math.min(Math.max(v, 1), 99);
-  }
-
-  function changeQty(delta) {
-    const el = document.getElementById('qty-input');
-    el.value = Math.min(Math.max((parseInt(el.value) || 1) + delta, 1), 99);
+  function changeItemQty(id, delta) {
+    const item = queue.find(q => q.id === id);
+    if (!item) return;
+    item.qty = Math.min(Math.max((item.qty || 1) + delta, 1), 99);
+    renderQueue();
   }
 
   function addToQueue() {
     if (!curProduct || !curDataURL) return;
-    const qty = getQty();
-    for (let i = 0; i < qty; i++) {
-      seq++;
-      queue.push({ id: seq, product: curProduct, dataURL: curDataURL });
-    }
+    seq++;
+    queue.push({ id: seq, product: curProduct, dataURL: curDataURL, qty: 1 });
     renderQueue();
     // 視覺回饋
     const btn = document.getElementById('btn-add');
@@ -496,9 +480,7 @@
 
   function printOne() {
     if (!curProduct || !curDataURL) return;
-    const qty = getQty();
-    const items = Array.from({ length: qty }, () => ({ product: curProduct, dataURL: curDataURL }));
-    doPrint(items);
+    doPrint([{ product: curProduct, dataURL: curDataURL, qty: 1 }]);
   }
 
   function printItem(id) {
@@ -518,13 +500,15 @@
 
   function doPrint(items) {
     document.getElementById('print-area').innerHTML =
-      items.map(it => `
-        <div class="plabel">
-          <img src="${it.dataURL}" alt="${it.product}">
-          <div class="plabel-prod">${it.product}</div>
-          <div class="plabel-sub">場內看板</div>
-        </div>
-      `).join('');
+      items.flatMap(it =>
+        Array.from({ length: it.qty || 1 }, () => `
+          <div class="plabel">
+            <img src="${it.dataURL}" alt="${it.product}">
+            <div class="plabel-prod">${it.product}</div>
+            <div class="plabel-sub">場內看板</div>
+          </div>
+        `)
+      ).join('');
     window.print();
   }
 
@@ -534,8 +518,9 @@
     const badge = document.getElementById('qbadge');
     const btn   = document.getElementById('btn-pall');
 
+    const totalLabels = queue.reduce((s, q) => s + (q.qty || 1), 0);
     count.textContent = queue.length;
-    badge.textContent = queue.length;
+    badge.textContent = totalLabels;
     badge.classList.toggle('on', queue.length > 0);
     btn.disabled = queue.length === 0;
 
@@ -550,6 +535,12 @@
         <div class="qi-info">
           <div class="qi-prod">${it.product}</div>
           <div class="qi-num"># ${String(i + 1).padStart(2, '0')}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:4px;margin:0 4px;">
+          <button class="qty-btn" onclick="changeItemQty(${it.id},-1)">−</button>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:0.88rem;font-weight:700;
+                       color:var(--cyan);min-width:20px;text-align:center;">${it.qty || 1}</span>
+          <button class="qty-btn" onclick="changeItemQty(${it.id},1)">＋</button>
         </div>
         <div class="qi-acts">
           <button class="qibtn qibtn-p" onclick="printItem(${it.id})">列印</button>
