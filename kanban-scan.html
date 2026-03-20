@@ -621,7 +621,8 @@
     </div>
     <div class="alert-main">
       <div class="alert-headline" id="t-alertHeadline">料號不符</div>
-      <div class="alert-codes">
+      <!-- 料號不符 -->
+      <div class="alert-codes" id="alert-codes-mismatch">
         <div class="alert-code-box expected">
           <div class="alert-code-label" id="t-alertExpectedLabel">基準料號（正確）</div>
           <div class="alert-code-val" id="alert-expected">---</div>
@@ -632,7 +633,31 @@
           <div class="alert-code-val" id="alert-scanned">---</div>
         </div>
       </div>
-      <button id="btn-resolve"><span id="t-alertResolve">確認處理完畢，解除警報</span></button>
+      <!-- 數量不足換批次 -->
+      <div class="alert-codes" id="alert-codes-switch" style="display:none">
+        <div class="alert-code-box expected">
+          <div class="alert-code-label" id="t-alertActualLabel">已完成張數</div>
+          <div class="alert-code-val" id="alert-actual-count" style="color:#fff">---</div>
+        </div>
+        <div class="alert-vs">/</div>
+        <div class="alert-code-box wrong">
+          <div class="alert-code-label" id="t-alertExpectedQtyLabel">應出張數</div>
+          <div class="alert-code-val" id="alert-expected-count">---</div>
+        </div>
+      </div>
+      <div id="alert-new-product-row" style="display:none;text-align:center;">
+        <div style="font-size:0.7rem;letter-spacing:3px;color:var(--muted);margin-bottom:8px;" id="t-alertNewProductLabel">新批次番號</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:1.4rem;font-weight:800;color:var(--cyan);letter-spacing:2px;" id="alert-new-product-val">---</div>
+      </div>
+      <div style="display:flex;gap:14px;flex-wrap:wrap;justify-content:center;">
+        <button id="btn-resolve"><span id="t-alertResolve">確認處理完畢，解除警報</span></button>
+        <button id="btn-switch-confirm" style="display:none;padding:18px 32px;background:var(--cyan);
+          border:none;border-radius:10px;color:#0d1421;font-family:'Rajdhani',sans-serif;
+          font-size:clamp(0.9rem,4vw,1.2rem);font-weight:700;letter-spacing:3px;
+          text-transform:uppercase;cursor:pointer;transition:all .2s;">
+          <span id="t-btnSwitchConfirm">確認換批次</span>
+        </button>
+      </div>
     </div>
   </div>
 
@@ -658,6 +683,10 @@
         badgeInternal:'場內', badgeCustomer:'客戶',
         resOk:'✓ 一致', resSet:'● 基準', resError:'✗ 不符',
         kindInternal:'場內', kindCustomer:'客戶', kindSuffix:'看板',
+        alertSwitchTitle:'⚠ 數量未完成 — 批次切換警告',
+        alertSwitchHeadline:'數量未達標', alertActualLabel:'已完成張數',
+        alertExpectedQtyLabel:'應出張數', alertNewProductLabel:'新批次番號',
+        btnSwitchConfirm:'確認換批次', alertResolveSwitch:'返回繼續',
       },
       vi: {
         logo:'So Sánh Kanban', refLabel:'Mã Chuẩn', refEmpty:'Chưa quét',
@@ -675,6 +704,10 @@
         badgeInternal:'NB', badgeCustomer:'KH',
         resOk:'✓ Khớp', resSet:'● Chuẩn', resError:'✗ Sai',
         kindInternal:'Nội bộ', kindCustomer:'Khách hàng', kindSuffix:'',
+        alertSwitchTitle:'⚠ SỐ LƯỢNG CHƯA ĐỦ — Cảnh báo đổi lô',
+        alertSwitchHeadline:'Số lượng chưa đạt', alertActualLabel:'Đã hoàn thành',
+        alertExpectedQtyLabel:'Số lượng yêu cầu', alertNewProductLabel:'Mã lô mới',
+        btnSwitchConfirm:'Xác nhận đổi lô', alertResolveSwitch:'Quay lại tiếp tục',
       },
       id: {
         logo:'Verifikasi Kanban', refLabel:'Kode Referensi', refEmpty:'Belum discan',
@@ -692,6 +725,10 @@
         badgeInternal:'INT', badgeCustomer:'CUST',
         resOk:'✓ Sesuai', resSet:'● Referensi', resError:'✗ Tidak sesuai',
         kindInternal:'Internal', kindCustomer:'Pelanggan', kindSuffix:'',
+        alertSwitchTitle:'⚠ JUMLAH BELUM CUKUP — Peringatan ganti batch',
+        alertSwitchHeadline:'Jumlah belum tercapai', alertActualLabel:'Sudah selesai',
+        alertExpectedQtyLabel:'Jumlah yang diminta', alertNewProductLabel:'Kode batch baru',
+        btnSwitchConfirm:'Konfirmasi ganti batch', alertResolveSwitch:'Kembali lanjutkan',
       },
     };
 
@@ -711,7 +748,8 @@
       const ids = ['logo','refLabel','scanLbl','internalLabel','customerLabel',
                    'historyTitle','historyRecent','thTime','thType','thCode','thResult',
                    'scannerLocked','alertTitle','alertHeadline','alertExpectedLabel',
-                   'alertWrongLabel','alertResolve'];
+                   'alertWrongLabel','alertResolve','alertActualLabel','alertExpectedQtyLabel',
+                   'alertNewProductLabel','btnSwitchConfirm'];
       ids.forEach(k => { const el = document.getElementById('t-'+k); if(el) el.textContent = L[k]; });
       document.getElementById('btn-reset').innerHTML =
         `${L.resetBtn} <span style="opacity:.5;font-size:.8em">ESC</span>`;
@@ -727,7 +765,8 @@
     }
     // ─────────────────────────────────────────────────────
 
-    const state = { ref: null, total: 0, countInternal: 0, countCustomer: 0 };
+    const state = { ref: null, total: 0, countInternal: 0, countCustomer: 0,
+                    expectedQty: null, pendingSwitch: null };
 
     const el  = id => document.getElementById(id);
     const Els = {
@@ -763,12 +802,14 @@
       const s = toHalf(raw).trim();
       if (s.includes('J004')) {
         const m = s.match(/\sE(.{15})(.{12})/);
-        if (m) return { kind: 'customer', product: m[2] };
-        return { kind: 'customer', product: null };
+        const qm = s.match(/\s(\d{6})\w?\s*$/);
+        const qty = qm ? parseInt(qm[1], 10) : null;
+        if (m) return { kind: 'customer', product: m[2], qty };
+        return { kind: 'customer', product: null, qty: null };
       }
       if (INTERNAL_PREFIX && s.startsWith(INTERNAL_PREFIX))
-        return { kind: 'internal', product: s.slice(INTERNAL_PREFIX.length).trim() };
-      return { kind: 'internal', product: s };
+        return { kind: 'internal', product: s.slice(INTERNAL_PREFIX.length).trim(), qty: null };
+      return { kind: 'internal', product: s, qty: null };
     }
 
     // ── 主處理 ────────────────────────────────────────────
@@ -780,7 +821,7 @@
         return;
       }
 
-      const { kind, product } = extractProduct(raw);
+      const { kind, product, qty } = extractProduct(raw);
       const kindLabel = kind === 'customer' ? t('kindCustomer') : t('kindInternal');
 
       if (!product) {
@@ -789,37 +830,33 @@
       }
 
       if (state.ref === null) {
-        state.ref = product;
-        Els.refDisplay.textContent = product;
-        Els.refDisplay.classList.remove('empty');
-        Els.dotText.textContent = t('comparing');
-        const suffix = t('kindSuffix') ? `${kindLabel}${t('kindSuffix')}` : kindLabel;
-        setCard('set', t('refSet'), `${suffix} · ${product}`, 'LOCKED');
-        addHistory(product, kindLabel, kind, 'set');
-        beep('ok');
+        startNewBatch(product, kind, kindLabel, qty);
       } else if (product === state.ref) {
         // 只有正確才計數
         state.total++;
-        Els.scanCount.textContent = state.total;
-        if (kind === 'internal') {
-          state.countInternal++;
-          Els.countInternal.textContent = state.countInternal;
-          Els.ghostInternal.textContent = state.countInternal;
-          bumpCounter(Els.countInternal);
-        } else {
-          state.countCustomer++;
-          Els.countCustomer.textContent = state.countCustomer;
-          Els.ghostCustomer.textContent = state.countCustomer;
-          bumpCounter(Els.countCustomer);
-        }
+        updateCountDisplay(kind);
         const suffix = t('kindSuffix') ? `${kindLabel}${t('kindSuffix')}` : kindLabel;
-        setCard('ok', t('matchOk'), `${suffix} · ${product}`, 'MATCH OK');
+        const progress = state.expectedQty ? ` (${state.total}/${state.expectedQty})` : '';
+        setCard('ok', t('matchOk'), `${suffix} · ${product}${progress}`, 'MATCH OK');
+        Els.scanCount.textContent = state.expectedQty
+          ? `${state.total}/${state.expectedQty}` : state.total;
         addHistory(product, kindLabel, kind, 'ok');
         beep('ok');
       } else {
-        addHistory(product, kindLabel, kind, 'error');
-        beep('error');
-        triggerAlert(product);
+        // 不同番號出現 — 判斷是否需要換批次
+        const actual   = state.total;
+        const expected = state.expectedQty;
+        if (expected !== null && actual !== expected) {
+          // 數量未達標，跳警告
+          addHistory(product, kindLabel, kind, 'error');
+          beep('error');
+          state.pendingSwitch = { product, kind, kindLabel, qty };
+          triggerSwitchAlert(actual, expected, product);
+        } else {
+          // 數量已達標或無預期數量，自動換批次
+          addHistory(product, kindLabel, kind, 'set');
+          startNewBatch(product, kind, kindLabel, qty);
+        }
       }
     }
 
@@ -837,12 +874,70 @@
       setTimeout(() => { el.style.transform = ''; }, 120);
     }
 
+    function updateCountDisplay(kind) {
+      if (kind === 'internal') {
+        state.countInternal++;
+        Els.countInternal.textContent = state.countInternal;
+        Els.ghostInternal.textContent = state.countInternal;
+        bumpCounter(Els.countInternal);
+      } else {
+        state.countCustomer++;
+        Els.countCustomer.textContent = state.countCustomer;
+        Els.ghostCustomer.textContent = state.countCustomer;
+        bumpCounter(Els.countCustomer);
+      }
+    }
+
+    function startNewBatch(product, kind, kindLabel, qty) {
+      state.ref = product;
+      state.total = 0;
+      state.countInternal = 0;
+      state.countCustomer = 0;
+      state.expectedQty = qty;
+      Els.refDisplay.textContent = qty ? `${product} ×${qty}` : product;
+      Els.refDisplay.classList.remove('empty');
+      Els.countInternal.textContent = '0';
+      Els.countCustomer.textContent = '0';
+      Els.ghostInternal.textContent = '0';
+      Els.ghostCustomer.textContent = '0';
+      Els.scanCount.textContent = qty ? `0/${qty}` : '0';
+      Els.dotText.textContent = t('comparing');
+      const suffix = t('kindSuffix') ? `${kindLabel}${t('kindSuffix')}` : kindLabel;
+      setCard('set', t('refSet'), `${suffix} · ${product}`, 'LOCKED');
+      addHistory(product, kindLabel, kind, 'set');
+      beep('ok');
+    }
+
     // ── 警報 ──────────────────────────────────────────────
     let alertSoundInterval = null;
 
     function triggerAlert(wrongProduct) {
+      document.getElementById('alert-codes-mismatch').style.display = '';
+      document.getElementById('alert-codes-switch').style.display   = 'none';
+      document.getElementById('alert-new-product-row').style.display = 'none';
+      document.getElementById('btn-switch-confirm').style.display   = 'none';
+      document.getElementById('t-alertResolve').textContent = t('alertResolve');
+      document.getElementById('t-alertTitle').textContent   = t('alertTitle');
+      document.getElementById('t-alertHeadline').textContent = t('alertHeadline');
       Els.alertExpected.textContent = state.ref;
       Els.alertScanned.textContent  = wrongProduct;
+      Els.alertView.classList.remove('hidden');
+      Els.mainView.classList.add('hidden');
+      playAlertSound();
+      alertSoundInterval = setInterval(playAlertSound, 2000);
+    }
+
+    function triggerSwitchAlert(actual, expected, newProduct) {
+      document.getElementById('alert-codes-mismatch').style.display  = 'none';
+      document.getElementById('alert-codes-switch').style.display    = '';
+      document.getElementById('alert-new-product-row').style.display = '';
+      document.getElementById('btn-switch-confirm').style.display    = '';
+      document.getElementById('t-alertResolve').textContent    = t('alertResolveSwitch');
+      document.getElementById('t-alertTitle').textContent      = t('alertSwitchTitle');
+      document.getElementById('t-alertHeadline').textContent   = t('alertSwitchHeadline');
+      document.getElementById('alert-actual-count').textContent   = actual;
+      document.getElementById('alert-expected-count').textContent = expected;
+      document.getElementById('alert-new-product-val').textContent = newProduct;
       Els.alertView.classList.remove('hidden');
       Els.mainView.classList.add('hidden');
       playAlertSound();
@@ -858,8 +953,21 @@
 
     el('btn-resolve').onclick = () => {
       stopAlertSound();
+      state.pendingSwitch = null;
       Els.alertView.classList.add('hidden');
       Els.mainView.classList.remove('hidden');
+      Els.input.focus();
+    };
+
+    el('btn-switch-confirm').onclick = () => {
+      stopAlertSound();
+      Els.alertView.classList.add('hidden');
+      Els.mainView.classList.remove('hidden');
+      if (state.pendingSwitch) {
+        const { product, kind, kindLabel, qty } = state.pendingSwitch;
+        state.pendingSwitch = null;
+        startNewBatch(product, kind, kindLabel, qty);
+      }
       Els.input.focus();
     };
 
@@ -867,6 +975,7 @@
     function doReset() {
       state.ref = null; state.total = 0;
       state.countInternal = 0; state.countCustomer = 0;
+      state.expectedQty = null; state.pendingSwitch = null;
       Els.scanCount.textContent       = '0';
       Els.countInternal.textContent   = '0';
       Els.countCustomer.textContent   = '0';
