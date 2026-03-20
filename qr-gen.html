@@ -412,7 +412,7 @@
     // 產生 QR
     const canvas = document.getElementById('qr-canvas');
     try {
-      await QRCode.toCanvas(canvas, product, {
+      await QRCode.toCanvas(canvas, 'RAY:' + product, {
         width: 300, margin: 1,
         color: { dark: '#000000', light: '#ffffff' }
       });
