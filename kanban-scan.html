@@ -858,9 +858,7 @@
           triggerSwitchAlert(actual, expected, product);
         } else {
           // 數量已達標或無預期數量，自動換批次
-          addHistory(product, kindLabel, kind, 'set');
-          beepBatchComplete();
-          startNewBatch(product, kind, kindLabel, qty);
+          startNewBatch(product, kind, kindLabel, qty, 'batch');
         }
       }
     }
@@ -893,7 +891,7 @@
       }
     }
 
-    function startNewBatch(product, kind, kindLabel, qty) {
+    function startNewBatch(product, kind, kindLabel, qty, sound = 'ok') {
       state.ref = product;
       state.total = 0;
       state.countInternal = 0;
@@ -910,7 +908,7 @@
       const suffix = t('kindSuffix') ? `${kindLabel}${t('kindSuffix')}` : kindLabel;
       setCard('set', t('refSet'), `${suffix} · ${product}`, 'LOCKED');
       addHistory(product, kindLabel, kind, 'set');
-      beep('ok');
+      if (sound === 'batch') beepBatchComplete(); else beep('ok');
     }
 
     // ── 警報 ──────────────────────────────────────────────
@@ -971,7 +969,7 @@
       if (state.pendingSwitch) {
         const { product, kind, kindLabel, qty } = state.pendingSwitch;
         state.pendingSwitch = null;
-        startNewBatch(product, kind, kindLabel, qty);
+        startNewBatch(product, kind, kindLabel, qty, 'batch');
       }
       Els.input.focus();
     };
@@ -1045,17 +1043,23 @@
     function beepBatchComplete() {
       try {
         const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        // 三音上升：Do Mi Sol — 表示完成切換
-        [523, 659, 784].forEach((freq, i) => {
+        // 工廠環境：高頻方波三音上升，音量大，穿透噪音
+        // 低→中→高，間隔短促，尾音拉長
+        const notes = [
+          { freq: 900,  dur: 0.12, at: 0.00 },
+          { freq: 1150, dur: 0.12, at: 0.16 },
+          { freq: 1400, dur: 0.30, at: 0.32 },
+        ];
+        notes.forEach(n => {
           const osc  = ctx.createOscillator();
           const gain = ctx.createGain();
           osc.connect(gain); gain.connect(ctx.destination);
-          osc.frequency.value = freq;
-          osc.type = 'sine';
-          const t = ctx.currentTime + i * 0.18;
-          gain.gain.setValueAtTime(0.3, t);
-          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
-          osc.start(t); osc.stop(t + 0.28);
+          osc.frequency.value = n.freq;
+          osc.type = 'square';
+          const t = ctx.currentTime + n.at;
+          gain.gain.setValueAtTime(0.55, t);
+          gain.gain.exponentialRampToValueAtTime(0.001, t + n.dur);
+          osc.start(t); osc.stop(t + n.dur + 0.01);
         });
       } catch (e) {}
     }
