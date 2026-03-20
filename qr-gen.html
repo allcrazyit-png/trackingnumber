@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QR 看板產生器</title>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  <style>
+    :root {
+      --bg:     #0d1421;
+      --card:   #131f33;
+      --border: rgba(255,255,255,0.07);
+      --cyan:   #00c8ff;
+      --orange: #ff6d00;
+      --green:  #00e676;
+      --red:    #ff1744;
+      --text:   #e8edf5;
+      --muted:  #4a6080;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      background:var(--bg);color:var(--text);
+      font-family:'Rajdhani',sans-serif;
+      height:100vh;display:flex;flex-direction:column;overflow:hidden;
+    }
+
+    /* ── HEADER ─────────────────────────────── */
+    header{
+      height:56px;padding:0 28px;flex-shrink:0;
+      border-bottom:1px solid var(--border);
+      display:flex;align-items:center;gap:16px;
+      background:rgba(13,20,33,0.98);
+    }
+    .logo{
+      font-size:1rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;
+      color:var(--cyan);display:flex;align-items:center;gap:10px;
+    }
+    .logo-box{
+      width:30px;height:30px;border:2px solid var(--cyan);border-radius:6px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:0.6rem;font-weight:800;
+    }
+    .hdiv{width:1px;height:22px;background:var(--border);}
+    .hstatus{
+      display:flex;align-items:center;gap:7px;
+      font-size:0.75rem;font-weight:600;letter-spacing:2px;
+      text-transform:uppercase;color:var(--muted);
+    }
+    .sdot{
+      width:6px;height:6px;border-radius:50%;
+      background:var(--green);box-shadow:0 0 8px var(--green);
+      animation:sdot 2s infinite;
+    }
+    @keyframes sdot{50%{opacity:.35}}
+    .hright{margin-left:auto;display:flex;align-items:center;gap:14px;}
+    .qbadge{
+      background:var(--orange);color:#fff;
+      font-family:'JetBrains Mono',monospace;font-size:0.7rem;font-weight:700;
+      padding:2px 10px;border-radius:20px;display:none;
+    }
+    .qbadge.on{display:block;}
+    .nav-back{
+      font-size:0.75rem;letter-spacing:2px;text-transform:uppercase;
+      color:var(--muted);text-decoration:none;transition:color .2s;
+    }
+    .nav-back:hover{color:var(--cyan);}
+
+    /* ── LAYOUT ─────────────────────────────── */
+    main{
+      flex:1;display:grid;
+      grid-template-columns:1fr 360px;
+      overflow:hidden;
+    }
+
+    /* ── LEFT ───────────────────────────────── */
+    .scan-panel{
+      padding:32px;display:flex;flex-direction:column;gap:24px;
+      border-right:1px solid var(--border);overflow-y:auto;
+    }
+    .ptitle{
+      font-size:0.65rem;font-weight:700;letter-spacing:4px;
+      text-transform:uppercase;color:var(--muted);
+    }
+
+    /* Idle card */
+    .idle-card{
+      border:1px solid var(--border);border-radius:14px;
+      background:var(--card);padding:48px 32px;
+      display:flex;flex-direction:column;align-items:center;gap:20px;
+      text-align:center;position:relative;overflow:hidden;
+    }
+    .idle-card::after{
+      content:'';position:absolute;top:0;left:0;right:0;height:2px;
+      background:linear-gradient(90deg,transparent,var(--cyan),transparent);
+      animation:sline 3s ease-in-out infinite;
+    }
+    @keyframes sline{0%,100%{opacity:.15}50%{opacity:1}}
+    .scan-icon{
+      width:72px;height:72px;
+      border:2px solid rgba(0,200,255,.25);border-radius:14px;
+      display:flex;align-items:center;justify-content:center;
+      color:var(--cyan);opacity:.6;
+    }
+    .idle-title{font-size:1.3rem;font-weight:700;letter-spacing:2px;}
+    .idle-sub{font-size:0.85rem;color:var(--muted);letter-spacing:1px;}
+
+    /* Result card */
+    .result-card{
+      border:2px solid rgba(0,200,255,.35);border-radius:14px;
+      background:rgba(0,200,255,.03);
+      display:none;flex-direction:column;gap:20px;padding:28px;
+      animation:fadein .25s ease-out;
+    }
+    .result-card.on{display:flex;}
+    @keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+    .result-top{display:flex;justify-content:space-between;align-items:center;}
+    .rlabel{font-size:0.65rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--cyan);}
+    .rkind {font-size:0.72rem;color:var(--muted);letter-spacing:1px;}
+    .result-body{display:flex;gap:28px;align-items:center;}
+    .qr-box{
+      width:148px;height:148px;flex-shrink:0;
+      background:#fff;border-radius:10px;padding:6px;
+      display:flex;align-items:center;justify-content:center;
+    }
+    .qr-box canvas{width:100%!important;height:100%!important;}
+    .rinfo{flex:1;}
+    .rprod-lbl{font-size:0.65rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+    .rprod{
+      font-family:'JetBrains Mono',monospace;font-size:1.7rem;font-weight:800;
+      color:var(--cyan);letter-spacing:2px;word-break:break-all;margin-bottom:14px;
+    }
+    .result-actions{display:flex;gap:10px;flex-wrap:wrap;}
+    .btn{
+      padding:11px 22px;border-radius:8px;
+      font-family:'Rajdhani',sans-serif;font-size:0.82rem;font-weight:700;
+      letter-spacing:2px;text-transform:uppercase;cursor:pointer;border:none;transition:all .2s;
+    }
+    .btn-add{background:var(--cyan);color:#0d1421;}
+    .btn-add:hover{background:#33d4ff;box-shadow:0 0 20px rgba(0,200,255,.4);}
+    .btn-now{background:transparent;border:1px solid var(--border);color:var(--text);}
+    .btn-now:hover{border-color:rgba(255,255,255,.25);background:rgba(255,255,255,.04);}
+    .rraw{
+      font-family:'JetBrains Mono',monospace;font-size:0.62rem;
+      color:var(--muted);word-break:break-all;line-height:1.6;
+      background:rgba(0,0,0,.2);padding:10px 14px;border-radius:8px;
+    }
+
+    /* Error */
+    .err-card{
+      border:1px solid rgba(255,23,68,.35);border-radius:10px;
+      background:rgba(255,23,68,.05);padding:16px 20px;
+      display:none;gap:10px;align-items:center;animation:fadein .2s ease-out;
+    }
+    .err-card.on{display:flex;}
+    .err-text{font-size:0.88rem;color:var(--red);font-weight:600;letter-spacing:1px;}
+
+    /* Last raw */
+    .raw-row{
+      font-family:'JetBrains Mono',monospace;font-size:0.62rem;
+      color:var(--muted);padding:10px 14px;background:rgba(0,0,0,.2);
+      border-radius:8px;word-break:break-all;line-height:1.6;
+    }
+
+    /* ── RIGHT: QUEUE ───────────────────────── */
+    .queue-panel{display:flex;flex-direction:column;overflow:hidden;}
+    .qhead{
+      padding:20px 20px 14px;border-bottom:1px solid var(--border);
+      flex-shrink:0;display:flex;align-items:center;justify-content:space-between;
+    }
+    .qtitle{font-size:0.65rem;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:var(--muted);}
+    .qcount{font-family:'JetBrains Mono',monospace;font-size:0.88rem;font-weight:700;color:var(--orange);}
+    .qlist{
+      flex:1;overflow-y:auto;padding:12px;
+      display:flex;flex-direction:column;gap:7px;
+    }
+    .qempty{
+      text-align:center;padding:50px 16px;
+      color:var(--muted);font-size:0.82rem;letter-spacing:1px;
+    }
+    .qi{
+      border:1px solid var(--border);border-radius:10px;
+      background:rgba(255,255,255,.02);padding:10px 12px;
+      display:flex;gap:10px;align-items:center;
+      animation:qi-in .2s ease-out;
+    }
+    @keyframes qi-in{from{opacity:0;transform:translateX(10px)}to{opacity:1;transform:none}}
+    .qi-thumb{
+      width:48px;height:48px;flex-shrink:0;
+      background:#fff;border-radius:6px;padding:3px;
+      display:flex;align-items:center;justify-content:center;
+    }
+    .qi-thumb img{width:100%;height:100%;}
+    .qi-info{flex:1;min-width:0;}
+    .qi-prod{
+      font-family:'JetBrains Mono',monospace;font-size:0.8rem;font-weight:700;
+      color:var(--text);letter-spacing:1px;white-space:nowrap;
+      overflow:hidden;text-overflow:ellipsis;
+    }
+    .qi-num{font-size:0.68rem;color:var(--muted);letter-spacing:1px;margin-top:3px;}
+    .qi-acts{display:flex;gap:5px;}
+    .qibtn{
+      padding:5px 10px;font-family:'Rajdhani',sans-serif;font-size:0.68rem;
+      font-weight:700;letter-spacing:1px;text-transform:uppercase;
+      border-radius:6px;cursor:pointer;transition:all .2s;
+    }
+    .qibtn-p{
+      background:transparent;border:1px solid rgba(0,200,255,.3);
+      color:rgba(0,200,255,.7);
+    }
+    .qibtn-p:hover{background:rgba(0,200,255,.08);border-color:var(--cyan);color:var(--cyan);}
+    .qibtn-d{
+      background:transparent;border:1px solid rgba(255,23,68,.3);
+      color:rgba(255,23,68,.7);
+    }
+    .qibtn-d:hover{background:rgba(255,23,68,.1);border-color:var(--red);color:var(--red);}
+
+    /* Queue footer */
+    .qfoot{
+      padding:14px;border-top:1px solid var(--border);
+      flex-shrink:0;display:flex;flex-direction:column;gap:7px;
+    }
+    .btn-pall{
+      width:100%;padding:15px;
+      background:var(--orange);color:#fff;border:none;
+      font-family:'Rajdhani',sans-serif;font-size:0.95rem;font-weight:700;
+      letter-spacing:3px;text-transform:uppercase;border-radius:10px;
+      cursor:pointer;transition:all .2s;
+    }
+    .btn-pall:hover{background:#ff8c00;box-shadow:0 0 24px rgba(255,109,0,.4);}
+    .btn-pall:disabled{opacity:.3;cursor:not-allowed;box-shadow:none;}
+    .btn-clr{
+      width:100%;padding:9px;background:transparent;
+      border:1px solid var(--border);color:var(--muted);
+      font-family:'Rajdhani',sans-serif;font-size:0.78rem;font-weight:600;
+      letter-spacing:2px;text-transform:uppercase;border-radius:8px;
+      cursor:pointer;transition:all .2s;
+    }
+    .btn-clr:hover{border-color:rgba(255,23,68,.4);color:var(--red);}
+
+    /* ── PRINT ──────────────────────────────── */
+    #print-area{display:none;}
+    @media print{
+      body>*:not(#print-area){display:none!important;}
+      #print-area{display:block!important;}
+      .plabel{
+        width:9cm;height:6cm;page-break-after:always;
+        display:flex;flex-direction:column;
+        align-items:center;justify-content:center;gap:10px;
+        border:1px solid #ddd;padding:14px;
+        font-family:'JetBrains Mono',monospace;
+      }
+      .plabel img{width:3.8cm;height:3.8cm;}
+      .plabel-prod{font-size:17px;font-weight:800;letter-spacing:3px;color:#000;}
+      .plabel-sub{font-size:9px;letter-spacing:2px;color:#888;font-family:Arial,sans-serif;}
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar{width:3px;}
+    ::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+
+    /* Mobile */
+    @media(max-width:700px){
+      main{grid-template-columns:1fr;grid-template-rows:1fr auto;}
+      .queue-panel{max-height:260px;}
+      .result-body{flex-direction:column;}
+      .qr-box{width:120px;height:120px;}
+    }
+
+    #barcode-input{position:fixed;opacity:0;pointer-events:none;width:1px;height:1px;}
+  </style>
+</head>
+<body>
+
+<input id="barcode-input" type="text" autofocus autocomplete="off">
+<div id="print-area"></div>
+
+<header>
+  <div class="logo">
+    <div class="logo-box">QR</div>
+    QR 看板產生器
+  </div>
+  <div class="hdiv"></div>
+  <div class="hstatus">
+    <span class="sdot"></span>
+    掃描槍就緒
+  </div>
+  <div class="hright">
+    <span class="qbadge" id="qbadge">0</span>
+    <a href="kanban-scan.html" class="nav-back">← 返回比對</a>
+  </div>
+</header>
+
+<main>
+  <!-- ── LEFT ── -->
+  <div class="scan-panel">
+    <div class="ptitle">掃描客戶看板</div>
+
+    <div class="idle-card" id="idle-card">
+      <div class="scan-icon">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M3 7V5a2 2 0 012-2h2M17 3h2a2 2 0 012 2v2M21 17v2a2 2 0 01-2 2h-2M7 21H5a2 2 0 01-2-2v-2"/>
+          <rect x="7" y="7" width="4" height="4" rx="1"/>
+          <rect x="13" y="7" width="4" height="4" rx="1"/>
+          <rect x="7" y="13" width="4" height="4" rx="1"/>
+          <path d="M13 13h4v4" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="idle-title">掃描客戶看板 QR</div>
+      <div class="idle-sub">系統自動擷取料號並產生場內標籤<br>可連續掃描，累積後一次列印</div>
+    </div>
+
+    <div class="err-card" id="err-card">
+      <span style="font-size:1.1rem">⚠</span>
+      <span class="err-text" id="err-text">無法擷取料號</span>
+    </div>
+
+    <div class="result-card" id="result-card">
+      <div class="result-top">
+        <span class="rlabel">擷取成功</span>
+        <span class="rkind">客戶看板</span>
+      </div>
+      <div class="result-body">
+        <div class="qr-box">
+          <canvas id="qr-canvas"></canvas>
+        </div>
+        <div class="rinfo">
+          <div class="rprod-lbl">場內料號</div>
+          <div class="rprod" id="rprod">—</div>
+          <div class="result-actions">
+            <button class="btn btn-add" id="btn-add" onclick="addToQueue()">+ 加入佇列</button>
+            <button class="btn btn-now" onclick="printOne()">立即列印</button>
+          </div>
+        </div>
+      </div>
+      <div class="rraw" id="rraw"></div>
+    </div>
+
+    <div>
+      <div class="ptitle" style="margin-bottom:8px">最後原始條碼</div>
+      <div class="raw-row" id="last-raw">—</div>
+    </div>
+  </div>
+
+  <!-- ── RIGHT: Queue ── -->
+  <div class="queue-panel">
+    <div class="qhead">
+      <span class="qtitle">列印佇列</span>
+      <span class="qcount"><span id="qcount">0</span> 筆</span>
+    </div>
+    <div class="qlist" id="qlist">
+      <div class="qempty">尚無待列印標籤</div>
+    </div>
+    <div class="qfoot">
+      <button class="btn-pall" id="btn-pall" disabled onclick="printAll()">列印全部</button>
+      <button class="btn-clr" onclick="clearAll()">清除全部</button>
+    </div>
+  </div>
+</main>
+
+<script>
+  const inp = document.getElementById('barcode-input');
+  document.addEventListener('click', () => inp.focus());
+  inp.focus();
+
+  let curProduct = null;
+  let curDataURL  = null;
+  let queue = [];
+  let seq   = 0;
+
+  // ── 擷取料號 ──────────────────────────
+  function extractProduct(raw) {
+    if (raw.includes('J004')) {
+      const m = raw.match(/\sE(.{15})(.{12})/);
+      return m ? m[2] : null;
+    }
+    return null;
+  }
+
+  // ── 掃描 ──────────────────────────────
+  inp.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === 'Tab') {
+      e.preventDefault();
+      const v = inp.value.trim();
+      inp.value = '';
+      if (v) handleScan(v);
+    }
+  });
+
+  async function handleScan(raw) {
+    document.getElementById('last-raw').textContent =
+      raw.length > 90 ? raw.slice(0, 90) + '…' : raw;
+
+    const product = extractProduct(raw);
+
+    if (!product) {
+      showErr('無法擷取料號 — 請確認是客戶看板 QR Code');
+      return;
+    }
+
+    curProduct = product;
+
+    // 產生 QR
+    const canvas = document.getElementById('qr-canvas');
+    try {
+      await QRCode.toCanvas(canvas, product, {
+        width: 136, margin: 1,
+        color: { dark: '#000000', light: '#ffffff' }
+      });
+      curDataURL = canvas.toDataURL();
+    } catch (e) {
+      showErr('QR Code 產生失敗');
+      return;
+    }
+
+    // 顯示結果
+    document.getElementById('err-card').classList.remove('on');
+    document.getElementById('idle-card').style.display = 'none';
+    document.getElementById('result-card').classList.add('on');
+    document.getElementById('rprod').textContent = product;
+    document.getElementById('rraw').textContent  =
+      raw.length > 100 ? raw.slice(0, 100) + '…' : raw;
+
+    // 重置加入按鈕
+    const btnAdd = document.getElementById('btn-add');
+    btnAdd.textContent = '+ 加入佇列';
+    btnAdd.style.background = '';
+  }
+
+  function showErr(msg) {
+    document.getElementById('result-card').classList.remove('on');
+    document.getElementById('err-card').classList.add('on');
+    document.getElementById('err-text').textContent = msg;
+    curProduct = null; curDataURL = null;
+  }
+
+  // ── 佇列操作 ──────────────────────────
+  function addToQueue() {
+    if (!curProduct || !curDataURL) return;
+    seq++;
+    queue.push({ id: seq, product: curProduct, dataURL: curDataURL });
+    renderQueue();
+    // 視覺回饋
+    const btn = document.getElementById('btn-add');
+    btn.textContent = '✓ 已加入';
+    btn.style.background = 'var(--green)';
+    setTimeout(() => {
+      btn.textContent = '+ 加入佇列';
+      btn.style.background = '';
+    }, 900);
+  }
+
+  function removeFromQueue(id) {
+    queue = queue.filter(q => q.id !== id);
+    renderQueue();
+  }
+
+  function printOne() {
+    if (!curProduct || !curDataURL) return;
+    doPrint([{ product: curProduct, dataURL: curDataURL }]);
+  }
+
+  function printItem(id) {
+    const item = queue.find(q => q.id === id);
+    if (item) doPrint([item]);
+  }
+
+  function printAll() {
+    if (!queue.length) return;
+    doPrint(queue);
+  }
+
+  function clearAll() {
+    queue = [];
+    renderQueue();
+  }
+
+  function doPrint(items) {
+    document.getElementById('print-area').innerHTML =
+      items.map(it => `
+        <div class="plabel">
+          <img src="${it.dataURL}" alt="${it.product}">
+          <div class="plabel-prod">${it.product}</div>
+          <div class="plabel-sub">場內看板</div>
+        </div>
+      `).join('');
+    window.print();
+  }
+
+  function renderQueue() {
+    const list  = document.getElementById('qlist');
+    const count = document.getElementById('qcount');
+    const badge = document.getElementById('qbadge');
+    const btn   = document.getElementById('btn-pall');
+
+    count.textContent = queue.length;
+    badge.textContent = queue.length;
+    badge.classList.toggle('on', queue.length > 0);
+    btn.disabled = queue.length === 0;
+
+    if (!queue.length) {
+      list.innerHTML = '<div class="qempty">尚無待列印標籤</div>';
+      return;
+    }
+
+    list.innerHTML = queue.map((it, i) => `
+      <div class="qi">
+        <div class="qi-thumb"><img src="${it.dataURL}"></div>
+        <div class="qi-info">
+          <div class="qi-prod">${it.product}</div>
+          <div class="qi-num"># ${String(i + 1).padStart(2, '0')}</div>
+        </div>
+        <div class="qi-acts">
+          <button class="qibtn qibtn-p" onclick="printItem(${it.id})">列印</button>
+          <button class="qibtn qibtn-d" onclick="removeFromQueue(${it.id})">刪</button>
+        </div>
+      </div>
+    `).join('');
+  }
+</script>
+</body>
+</html>
