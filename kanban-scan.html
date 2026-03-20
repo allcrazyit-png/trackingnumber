@@ -899,14 +899,11 @@
       state.expectedQty = qty;
       Els.refDisplay.textContent = qty ? `${product} ×${qty}` : product;
       Els.refDisplay.classList.remove('empty');
-      // 第一張直接計入
-      state.total = 1;
-      updateCountDisplay(kind);
-      Els.scanCount.textContent = qty ? `1/${qty}` : '1';
+      state.total = 0;
+      Els.scanCount.textContent = qty ? `0/${qty}` : '0';
       Els.dotText.textContent = t('comparing');
       const suffix = t('kindSuffix') ? `${kindLabel}${t('kindSuffix')}` : kindLabel;
-      const progress = qty ? ` (1/${qty})` : '';
-      setCard('set', t('refSet'), `${suffix} · ${product}${progress}`, 'LOCKED');
+      setCard('set', t('refSet'), `${suffix} · ${product}`, 'LOCKED');
       addHistory(product, kindLabel, kind, 'set');
       if (sound === 'batch') beepBatchComplete(); else beep('ok');
     }
