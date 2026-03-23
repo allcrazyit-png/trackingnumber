@@ -665,7 +665,22 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script>
+    // ── Supabase ──────────────────────────────────────────
+    const _sb = window.supabase.createClient(
+      'https://vvityqfkazcqnporvwka.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ2aXR5cWZrYXpjcW5wb3J2d2thIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwODkxMTEsImV4cCI6MjA4OTY2NTExMX0.GFrM0Wt5Qcb63382bmOSXEhqWrqlgORh2mUDNNHSB4k'
+    );
+
+    function generateSessionId() {
+      const n = new Date();
+      const d = n.toLocaleDateString('zh-TW').replace(/\//g, '');
+      const t = n.toTimeString().slice(0, 8).replace(/:/g, '');
+      return `session_${d}_${t}`;
+    }
+    const SESSION_ID = generateSessionId();
+
     // ── 設定 ─────────────────────────────────────────────
     const INTERNAL_PREFIX = 'RAY:';
 
@@ -776,7 +791,8 @@
     // ─────────────────────────────────────────────────────
 
     const state = { ref: null, total: 0, countInternal: 0, countCustomer: 0,
-                    expectedQty: null, pendingSwitch: null, scannedSerials: new Set() };
+                    expectedQty: null, pendingSwitch: null, scannedSerials: new Set(),
+                    scanLogs: [] };
 
     const el  = id => document.getElementById(id);
     const Els = {
@@ -845,11 +861,11 @@
       }
 
       if (state.ref === null) {
-        startNewBatch(product, kind, kindLabel, qty);
+        startNewBatch(product, kind, kindLabel, qty, 'ok', raw);
       } else if (product === state.ref) {
         // 重複序號檢查
         if (serial && state.scannedSerials.has(serial)) {
-          addHistory(product, kindLabel, kind, 'error');
+          addHistory(product, kindLabel, kind, 'error', raw);
           beep('error');
           triggerDuplicateAlert(serial);
           return;
@@ -863,19 +879,19 @@
         setCard('ok', t('matchOk'), `${suffix} · ${product}${progress}`, 'MATCH OK');
         Els.scanCount.textContent = state.expectedQty
           ? `${state.total}/${state.expectedQty}` : state.total;
-        addHistory(product, kindLabel, kind, 'ok');
+        addHistory(product, kindLabel, kind, 'ok', raw);
         beep('ok');
       } else {
         // 不同番號出現 — 場內張數必須等於客戶張數才能換批
         if (state.countInternal !== state.countCustomer) {
           // 兩邊不一致，跳警告
-          addHistory(product, kindLabel, kind, 'error');
+          addHistory(product, kindLabel, kind, 'error', raw);
           beep('error');
           state.pendingSwitch = { product, kind, kindLabel, qty };
           triggerSwitchAlert(state.countInternal, state.countCustomer, product);
         } else {
           // 兩邊一致，自動換批次
-          startNewBatch(product, kind, kindLabel, qty, 'batch');
+          startNewBatch(product, kind, kindLabel, qty, 'batch', raw);
         }
       }
     }
@@ -908,7 +924,7 @@
       }
     }
 
-    function startNewBatch(product, kind, kindLabel, qty, sound = 'ok') {
+    function startNewBatch(product, kind, kindLabel, qty, sound = 'ok', raw = '') {
       state.ref = product;
       state.expectedQty = qty;
       state.scannedSerials = new Set();
@@ -925,7 +941,7 @@
       Els.dotText.textContent = t('comparing');
       const suffix = t('kindSuffix') ? `${kindLabel}${t('kindSuffix')}` : kindLabel;
       setCard('set', t('refSet'), `${suffix} · ${product}`, 'LOCKED');
-      addHistory(product, kindLabel, kind, 'set');
+      addHistory(product, kindLabel, kind, 'set', raw);
       if (sound === 'batch') beepBatchComplete(); else beep('ok');
     }
 
@@ -1014,11 +1030,21 @@
     };
 
     // ── 重置 ──────────────────────────────────────────────
-    function doReset() {
+    async function doReset() {
+      if (state.scanLogs.length > 0) {
+        const { error } = await _sb.from('kanban_scans').insert(state.scanLogs);
+        if (error) {
+          alert(`⚠️ 資料上傳失敗：${error.message}\n請截圖此訊息回報。`);
+          return; // 上傳失敗時不重置，避免資料遺失
+        }
+        console.log(`已上傳 ${state.scanLogs.length} 筆，Session: ${SESSION_ID}`);
+      }
+
       state.ref = null; state.total = 0;
       state.countInternal = 0; state.countCustomer = 0;
       state.expectedQty = null; state.pendingSwitch = null;
       state.scannedSerials = new Set();
+      state.scanLogs = [];
       Els.scanCount.textContent       = '0';
       Els.countInternal.textContent   = '0';
       Els.countCustomer.textContent   = '0';
@@ -1035,8 +1061,9 @@
     el('btn-reset').onclick = doReset;
 
     // ── 歷史 ──────────────────────────────────────────────
-    function addHistory(product, kindLabel, kind, result) {
+    function addHistory(product, kindLabel, kind, result, raw) {
       const now   = new Date().toLocaleTimeString('zh-TW', { hour12: false });
+      state.scanLogs.push({ scanned_at: now, scan_type: kind, sku: product || '', raw_qr: raw || '', session_id: SESSION_ID });
       const badge = kind === 'internal'
         ? `<span class="badge badge-i">${t('badgeInternal')}</span>`
         : `<span class="badge badge-c">${t('badgeCustomer')}</span>`;
