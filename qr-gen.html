@@ -526,15 +526,17 @@
   async function doPrint(items) {
     const area = document.getElementById('print-area');
     area.innerHTML = '';
+    const tmpCanvas = document.createElement('canvas');
     for (const it of items) {
       for (let i = 0; i < (it.qty || 1); i++) {
         const serial = genSerial();
         const content = 'RAY:' + it.product + '-' + serial;
         try {
-          const dataURL = await QRCode.toDataURL(content, {
+          await QRCode.toCanvas(tmpCanvas, content, {
             width: 300, margin: 1,
             color: { dark: '#000000', light: '#ffffff' }
           });
+          const dataURL = tmpCanvas.toDataURL();
           const div = document.createElement('div');
           div.className = 'plabel';
           div.innerHTML = `
