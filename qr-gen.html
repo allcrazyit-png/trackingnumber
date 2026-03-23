@@ -384,6 +384,13 @@
   let queue = [];
   let seq   = 0;
 
+  function genSerial() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let s = '';
+    for (let i = 0; i < 4; i++) s += chars[Math.floor(Math.random() * chars.length)];
+    return s;
+  }
+
   // ── localStorage ──────────────────────
   function saveQueue() {
     try { localStorage.setItem('ray-qr-queue', JSON.stringify(queue)); } catch(e) {}
@@ -439,6 +446,7 @@
         width: 300, margin: 1,
         color: { dark: '#000000', light: '#ffffff' }
       });
+      // preview 不含序號，列印時才產生
       curDataURL = canvas.toDataURL();
     } catch (e) {
       showErr('QR Code 產生失敗');
@@ -495,18 +503,18 @@
   }
 
   function printOne() {
-    if (!curProduct || !curDataURL) return;
-    doPrint([{ product: curProduct, dataURL: curDataURL, qty: 1 }]);
+    if (!curProduct) return;
+    doPrint([{ product: curProduct, qty: 1 }]);
   }
 
   function printItem(id) {
     const item = queue.find(q => q.id === id);
-    if (item) doPrint([item]);
+    if (item) doPrint([{ product: item.product, qty: item.qty }]);
   }
 
   function printAll() {
     if (!queue.length) return;
-    doPrint(queue);
+    doPrint(queue.map(q => ({ product: q.product, qty: q.qty })));
   }
 
   function clearAll() {
@@ -515,17 +523,29 @@
     renderQueue();
   }
 
-  function doPrint(items) {
-    document.getElementById('print-area').innerHTML =
-      items.flatMap(it =>
-        Array.from({ length: it.qty || 1 }, () => `
-          <div class="plabel">
-            <img src="${it.dataURL}" alt="${it.product}">
+  async function doPrint(items) {
+    const area = document.getElementById('print-area');
+    area.innerHTML = '';
+    for (const it of items) {
+      for (let i = 0; i < (it.qty || 1); i++) {
+        const serial = genSerial();
+        const content = 'RAY:' + it.product + '-' + serial;
+        try {
+          const dataURL = await QRCode.toDataURL(content, {
+            width: 300, margin: 1,
+            color: { dark: '#000000', light: '#ffffff' }
+          });
+          const div = document.createElement('div');
+          div.className = 'plabel';
+          div.innerHTML = `
+            <img src="${dataURL}" alt="${it.product}">
             <div class="plabel-prod">${it.product}</div>
-            <div class="plabel-sub">場內看板</div>
-          </div>
-        `)
-      ).join('');
+            <div class="plabel-sub">SN:${serial}</div>
+          `;
+          area.appendChild(div);
+        } catch(e) {}
+      }
+    }
     window.print();
   }
 

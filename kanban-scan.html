@@ -691,6 +691,8 @@
         alertSwitchHeadline:'兩邊張數不符', alertActualLabel:'場內張數',
         alertExpectedQtyLabel:'客戶張數', alertNewProductLabel:'新批次番號',
         btnSwitchConfirm:'確認換批次', alertResolveSwitch:'返回繼續',
+        alertDupTitle:'⚠ 重複掃描警報', alertDupHeadline:'同一張看板掃了兩次',
+        alertDupRefLabel:'當前批次料號', alertDupSerialLabel:'重複序號',
       },
       vi: {
         logo:'So Sánh Kanban', refLabel:'Mã Chuẩn', refEmpty:'Chưa quét',
@@ -712,6 +714,8 @@
         alertSwitchHeadline:'Số lượng 2 bên không khớp', alertActualLabel:'Kanban nội bộ',
         alertExpectedQtyLabel:'Kanban khách hàng', alertNewProductLabel:'Mã lô mới',
         btnSwitchConfirm:'Xác nhận đổi lô', alertResolveSwitch:'Quay lại tiếp tục',
+        alertDupTitle:'⚠ CẢNH BÁO — Quét trùng', alertDupHeadline:'Kanban này đã được quét',
+        alertDupRefLabel:'Mã lô hiện tại', alertDupSerialLabel:'Số serial trùng',
       },
       id: {
         logo:'Verifikasi Kanban', refLabel:'Kode Referensi', refEmpty:'Belum discan',
@@ -733,6 +737,8 @@
         alertSwitchHeadline:'Jumlah 2 sisi tidak cocok', alertActualLabel:'Kanban Internal',
         alertExpectedQtyLabel:'Kanban Pelanggan', alertNewProductLabel:'Kode batch baru',
         btnSwitchConfirm:'Konfirmasi ganti batch', alertResolveSwitch:'Kembali lanjutkan',
+        alertDupTitle:'⚠ PERINGATAN — Scan duplikat', alertDupHeadline:'Kanban ini sudah pernah discan',
+        alertDupRefLabel:'Kode batch saat ini', alertDupSerialLabel:'Serial duplikat',
       },
     };
 
@@ -770,7 +776,7 @@
     // ─────────────────────────────────────────────────────
 
     const state = { ref: null, total: 0, countInternal: 0, countCustomer: 0,
-                    expectedQty: null, pendingSwitch: null };
+                    expectedQty: null, pendingSwitch: null, scannedSerials: new Set() };
 
     const el  = id => document.getElementById(id);
     const Els = {
@@ -811,9 +817,14 @@
         if (m) return { kind: 'customer', product: m[2], qty };
         return { kind: 'customer', product: null, qty: null };
       }
-      if (INTERNAL_PREFIX && s.startsWith(INTERNAL_PREFIX))
-        return { kind: 'internal', product: s.slice(INTERNAL_PREFIX.length).trim(), qty: null };
-      return { kind: 'internal', product: s, qty: null };
+      if (INTERNAL_PREFIX && s.startsWith(INTERNAL_PREFIX)) {
+        const body = s.slice(INTERNAL_PREFIX.length).trim();
+        const dashIdx = body.lastIndexOf('-');
+        if (dashIdx > 0)
+          return { kind: 'internal', product: body.slice(0, dashIdx), qty: null, serial: body.slice(dashIdx + 1) };
+        return { kind: 'internal', product: body, qty: null, serial: null };
+      }
+      return { kind: 'internal', product: s, qty: null, serial: null };
     }
 
     // ── 主處理 ────────────────────────────────────────────
@@ -825,7 +836,7 @@
         return;
       }
 
-      const { kind, product, qty } = extractProduct(raw);
+      const { kind, product, qty, serial } = extractProduct(raw);
       const kindLabel = kind === 'customer' ? t('kindCustomer') : t('kindInternal');
 
       if (!product) {
@@ -836,8 +847,16 @@
       if (state.ref === null) {
         startNewBatch(product, kind, kindLabel, qty);
       } else if (product === state.ref) {
+        // 重複序號檢查
+        if (serial && state.scannedSerials.has(serial)) {
+          addHistory(product, kindLabel, kind, 'error');
+          beep('error');
+          triggerDuplicateAlert(serial);
+          return;
+        }
         // 只有正確才計數
         state.total++;
+        if (serial) state.scannedSerials.add(serial);
         updateCountDisplay(kind);
         const suffix = t('kindSuffix') ? `${kindLabel}${t('kindSuffix')}` : kindLabel;
         const progress = state.expectedQty ? ` (${state.total}/${state.expectedQty})` : '';
@@ -892,6 +911,7 @@
     function startNewBatch(product, kind, kindLabel, qty, sound = 'ok') {
       state.ref = product;
       state.expectedQty = qty;
+      state.scannedSerials = new Set();
       // 兩邊歸零
       state.total = 0; state.countInternal = 0; state.countCustomer = 0;
       Els.countInternal.textContent = '0'; Els.ghostInternal.textContent = '0';
@@ -947,6 +967,25 @@
       alertSoundInterval = setInterval(playAlertSound, 2000);
     }
 
+    function triggerDuplicateAlert(serial) {
+      document.getElementById('alert-codes-mismatch').style.display = '';
+      document.getElementById('alert-codes-switch').style.display   = 'none';
+      document.getElementById('alert-new-product-row').style.display = 'none';
+      document.getElementById('btn-switch-confirm').style.display   = 'none';
+      document.getElementById('t-alertResolve').textContent    = t('alertResolve');
+      document.getElementById('t-alertTitle').textContent      = t('alertDupTitle');
+      document.getElementById('t-alertHeadline').textContent   = t('alertDupHeadline');
+      document.getElementById('t-alertExpectedLabel').textContent = t('alertDupRefLabel');
+      document.getElementById('t-alertWrongLabel').textContent    = t('alertDupSerialLabel');
+      Els.alertExpected.textContent = state.ref;
+      Els.alertScanned.textContent  = serial;
+      Els.alertView.classList.remove('hidden');
+      Els.mainView.classList.add('hidden');
+      stopAlertSound();
+      playAlertSound();
+      alertSoundInterval = setInterval(playAlertSound, 2000);
+    }
+
     function stopAlertSound() {
       if (alertSoundInterval) {
         clearInterval(alertSoundInterval);
@@ -979,6 +1018,7 @@
       state.ref = null; state.total = 0;
       state.countInternal = 0; state.countCustomer = 0;
       state.expectedQty = null; state.pendingSwitch = null;
+      state.scannedSerials = new Set();
       Els.scanCount.textContent       = '0';
       Els.countInternal.textContent   = '0';
       Els.countCustomer.textContent   = '0';
