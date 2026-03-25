@@ -439,8 +439,9 @@
       min-height: 0;
     }
     @media (max-width: 640px) {
-      .history-panel { flex: 1; min-height: 0; }
-      .table-scroll  { overflow-y: auto; }
+      #status-card    { flex-shrink: 1; }
+      .history-panel  { flex: 1; min-height: 120px; }
+      .table-scroll   { overflow-y: auto; }
     }
     .history-head {
       padding: 12px 20px;
