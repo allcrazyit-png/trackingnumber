@@ -1154,7 +1154,6 @@
       document.querySelector('.counter-panel.internal').classList.remove('mismatch');
       document.querySelector('.counter-panel.customer').classList.remove('mismatch');
       Els.dotText.textContent         = t('sysReady');
-      Els.historyBody.innerHTML       = `<tr><td colspan="4" style="padding:24px;text-align:center;color:var(--muted);font-style:italic">${t('historyEmpty')}</td></tr>`;
       Els.lastRaw.textContent         = '---';
       setCard('idle', t('statusIdle'), t('statusIdleSub'), 'STANDBY');
       if (!isMobile) Els.input.focus();
@@ -1174,6 +1173,7 @@
       } else {
         state.scanLogs.splice(0, state.uploadedCount + newLogs.length);
         state.uploadedCount = 0;
+        Els.historyBody.innerHTML = `<tr><td colspan="4" style="padding:24px;text-align:center;color:var(--muted);font-style:italic">${t('historyEmpty')}</td></tr>`;
         btn.textContent = '完成 ✓'; btn.style.borderColor = 'var(--green)'; btn.style.color = 'var(--green)';
         setTimeout(() => { btn.disabled = false; btn.textContent = '↑ 上傳'; btn.style.borderColor = ''; btn.style.color = ''; }, 2000);
       }
