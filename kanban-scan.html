@@ -1015,7 +1015,7 @@
     // ── 料號擷取 ─────────────────────────────────────────
     function extractProduct(raw) {
       const s = toHalf(raw).trim();
-      if (s.includes('J004')) {
+      if (s.includes('J004') || s.startsWith('1AC')) {
         const m = s.match(/\sE(.{15})(.{12})/);
         const qm = s.match(/\s(\d{6})\w?\s*$/);
         const qty = qm ? parseInt(qm[1], 10) : null;
@@ -1368,14 +1368,18 @@
     if (isMobile) {
       // 手機：用 document keydown 接收藍牙 / USB OTG 掃描槍，不 focus input 避免彈鍵盤
       let mobileBuffer = '';
+      let mobileBufferTimer = null;
       document.addEventListener('keydown', e => {
         if (e.key === 'Escape') { e.preventDefault(); doReset(); return; }
         if (e.key === 'Enter' || e.key === 'Tab') {
           e.preventDefault();
+          clearTimeout(mobileBufferTimer);
           const v = mobileBuffer.trim();
           mobileBuffer = '';
           if (v) handleScan(v);
         } else if (e.key.length === 1) {
+          clearTimeout(mobileBufferTimer);
+          mobileBufferTimer = setTimeout(() => { mobileBuffer = ''; }, 500);
           mobileBuffer += e.key;
         }
       });
