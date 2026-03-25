@@ -23,16 +23,25 @@
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+    html { height: 100%; }
     body {
       background: var(--bg);
       color: var(--text);
       font-family: 'DM Sans', sans-serif;
-      min-height: 100dvh;
+      height: 100%;
       display: flex;
       flex-direction: column;
+      overflow: hidden;
       /* Dot grid background */
       background-image: radial-gradient(circle, #b8c8db 1px, transparent 1px);
       background-size: 28px 28px;
+    }
+    #main-view {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      overflow: hidden;
     }
 
     .hidden { display: none !important; }
@@ -55,7 +64,7 @@
       display: flex; align-items: baseline; gap: 10px;
       padding: 6px 20px;
       background: var(--cyan);
-      position: sticky; top: 0; z-index: 11;
+      flex-shrink: 0;
     }
     .company-name {
       font-family: 'Rajdhani', sans-serif;
@@ -79,9 +88,8 @@
       padding: 10px 16px;
       background: rgba(255,255,255,0.95);
       border-bottom: 1px solid var(--border);
-      backdrop-filter: blur(8px);
-      position: sticky; top: 0; z-index: 10;
       flex-wrap: wrap;
+      flex-shrink: 0;
     }
 
     @media (max-width: 640px) {
@@ -256,6 +264,8 @@
       max-width: 1400px;
       margin: 0 auto;
       width: 100%;
+      min-height: 0;
+      overflow: hidden;
     }
 
     /* ── Status card ───────────────────────── */
@@ -411,10 +421,13 @@
       overflow: hidden;
       display: flex;
       flex-direction: column;
+      flex: 1;
+      min-height: 0;
     }
     .table-scroll {
       overflow-y: auto;
-      max-height: 32vh;
+      flex: 1;
+      min-height: 0;
     }
     .history-head {
       padding: 12px 20px;
@@ -474,6 +487,7 @@
       background: rgba(255,255,255,0.95);
       border-top: 1px solid var(--border);
       padding: 5px 28px;
+      flex-shrink: 0;
       display: flex; justify-content: space-between; align-items: center;
       font-size: 0.65rem;
       font-family: 'JetBrains Mono', monospace;
@@ -670,13 +684,13 @@
           </svg>
         </button>
         <div class="lang-menu">
-          <button class="lang-option active" id="lang-opt-zh" onclick="selectLang('zh','中文')">
+          <button class="lang-option active" id="lang-opt-zh" onclick="selectLang('zh')">
             <span class="lang-flag">🇹🇼</span> 中文
           </button>
-          <button class="lang-option" id="lang-opt-id" onclick="selectLang('id','Indonesia')">
+          <button class="lang-option" id="lang-opt-id" onclick="selectLang('id')">
             <span class="lang-flag">🇮🇩</span> Indonesia
           </button>
-          <button class="lang-option" id="lang-opt-vi" onclick="selectLang('vi','Tiếng Việt')">
+          <button class="lang-option" id="lang-opt-vi" onclick="selectLang('vi')">
             <span class="lang-flag">🇻🇳</span> Tiếng Việt
           </button>
         </div>
@@ -905,14 +919,20 @@
     let currentLang = localStorage.getItem('ray-lang') || 'zh';
     const t = k => (LANGS[currentLang] || LANGS.zh)[k] || k;
 
+    const langFlags = { zh:'🇹🇼', vi:'🇻🇳', id:'🇮🇩' };
+    const langLabels = { zh:'中文', vi:'Tiếng Việt', id:'Indonesia' };
+
     function applyLang(lang) {
       currentLang = lang;
       try { localStorage.setItem('ray-lang', lang); } catch(e) {}
       const L = LANGS[lang];
-      // Update language buttons
-      document.querySelectorAll('.lang-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.textContent.toLowerCase() === lang ||
-          (lang === 'zh' && btn.textContent === '中文'));
+      // Update dropdown trigger flag + label
+      document.getElementById('lang-current-flag').textContent = langFlags[lang] || '🇹🇼';
+      document.getElementById('lang-current-label').textContent = langLabels[lang] || lang;
+      // Update dropdown active state
+      ['zh','vi','id'].forEach(c => {
+        const o = document.getElementById('lang-opt-' + c);
+        if (o) o.classList.toggle('active', c === lang);
       });
       // Update static elements
       const ids = ['logo','refLabel','scanLbl','internalLabel','customerLabel',
@@ -1308,14 +1328,8 @@
     function toggleLangMenu() {
       document.getElementById('lang-dropdown').classList.toggle('open');
     }
-    const langFlags = { zh:'🇹🇼', vi:'🇻🇳', id:'🇮🇩' };
-    function selectLang(code, label) {
-      document.getElementById('lang-current-label').textContent = label;
-      document.getElementById('lang-current-flag').textContent = langFlags[code];
+    function selectLang(code) {
       document.getElementById('lang-dropdown').classList.remove('open');
-      ['zh','vi','id'].forEach(c => {
-        document.getElementById('lang-opt-' + c).classList.toggle('active', c === code);
-      });
       applyLang(code);
     }
     document.addEventListener('click', e => {
