@@ -1,3 +1,29 @@
+import { supabase } from './supabase.js'
+
+// 防止螢幕自動關閉 (Wake Lock API)
+async function requestWakeLock() {
+    if ('wakeLock' in navigator) {
+        try {
+            await navigator.wakeLock.request('screen');
+        } catch (err) {
+            console.warn('Wake Lock 無法啟用:', err);
+        }
+    }
+}
+// 頁面重新可見時重新取得 Wake Lock（切換 App 後回來）
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') requestWakeLock();
+});
+requestWakeLock();
+
+// 產生任務 session ID
+function generateSessionId() {
+    const now = new Date();
+    const date = now.toLocaleDateString('zh-TW', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '');
+    const time = now.toTimeString().substring(0, 8).replace(/:/g, '');
+    return `session_${date}_${time}`;
+}
+
 // 狀態管理
 const state = {
     isRunning: false,
@@ -12,7 +38,8 @@ const state = {
     alertTimerInterval: null,
     alertSecondsElapsed: 0,
     totalErrors: 0,
-    scanHistory: []
+    scanHistory: [],
+    sessionId: null        // 本次任務唯一 ID
 };
 
 // DOM 元素參考 (增加保護檢查)
@@ -81,6 +108,7 @@ function toggleTask() {
             state.allSessionHistory = [];
             state.currentSKU = null;
             state.totalErrors = 0;
+            state.sessionId = generateSessionId();
             if (elements.counts.internal) elements.counts.internal.textContent = "0";
             if (elements.counts.customer) elements.counts.customer.textContent = "0";
             if (elements.skuDisplay) {
@@ -142,6 +170,28 @@ function endTask() {
 
     state.isRunning = false;
     clearInterval(state.timerInterval);
+
+    // 上傳到 Supabase
+    if (state.allSessionHistory.length > 0) {
+        const rows = state.allSessionHistory.map(record => ({
+            scanned_at: record.time,
+            scan_type: record.type,
+            sku: record.sku,
+            raw_qr: record.raw,
+            session_id: state.sessionId,
+            total_duration: state.secondsElapsed,
+            total_errors: state.totalErrors
+        }));
+
+        supabase.from('kanban_scans').insert(rows).then(({ error }) => {
+            if (error) {
+                console.error('上傳失敗:', error.message);
+                alert(`⚠️ 資料上傳失敗：${error.message}\n請截圖此訊息回報。`);
+            } else {
+                console.log(`已上傳 ${rows.length} 筆掃描紀錄，Session: ${state.sessionId}`);
+            }
+        });
+    }
 
     // 產生報告
     const summaryMsg = `=== 理貨任務總結報告 ===\n\n` +
