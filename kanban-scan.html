@@ -1229,6 +1229,7 @@
     async function doReset() {
       if (state.total > 0 && !confirm(t('confirmReset'))) return;
       const resetBtn = el('btn-reset');
+      resetBtn.blur();
       if (state.scanLogs.length > 0) {
         resetBtn.disabled = true;
         resetBtn.textContent = '上傳中…';
