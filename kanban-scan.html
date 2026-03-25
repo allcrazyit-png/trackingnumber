@@ -187,14 +187,25 @@
 
     /* Mobile header */
     @media (max-width: 640px) {
+      header          { gap:0; justify-content:space-between; }
       .ref-pill       { display:none; }
       .divider        { display:none; }
       #qr-link        { display:none; }
       .logo-text-sub  { display:none; }
-      .scan-counter   { display:flex !important; }
       .lang-label-text { display:none; }
-      .lang-trigger   { padding:7px 10px; font-size:1rem; }
-      #btn-reset      { padding:6px 10px; font-size:0.75rem; letter-spacing:0; }
+
+      /* 三個元素等寬 */
+      .scan-counter, #btn-reset, .lang-dropdown {
+        flex: 1;
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+      }
+      .scan-counter   { flex-direction:column; }
+      #btn-reset      { padding:10px 0; font-size:0.8rem; letter-spacing:0; width:100%; border-radius:0; border-left:1px solid var(--border); border-right:1px solid var(--border); border-top:none; border-bottom:none; }
+      .lang-trigger   { padding:10px 0; font-size:1rem; width:100%; justify-content:center; border:none; border-radius:0; }
+      .lang-dropdown  { border:none; }
+      .lang-menu      { right:0; }
     }
 
     /* ═══════════════════════════════════════════
