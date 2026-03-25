@@ -667,6 +667,18 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script>
+    // 防止螢幕自動變暗（Wake Lock API）
+    if ('wakeLock' in navigator) {
+      const requestWakeLock = async () => {
+        try { await navigator.wakeLock.request('screen'); } catch (e) {}
+      };
+      requestWakeLock();
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') requestWakeLock();
+      });
+    }
+  </script>
+  <script>
     // ── Supabase ──────────────────────────────────────────
     const _sb = window.supabase.createClient(
       'https://vvityqfkazcqnporvwka.supabase.co',
