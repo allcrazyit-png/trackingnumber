@@ -195,7 +195,8 @@
       transition: all 0.15s;
       white-space: nowrap;
     }
-    #btn-reset:hover { border-color: var(--red); color: var(--red); }
+    @media (hover: hover) { #btn-reset:hover { border-color: var(--red); color: var(--red); } }
+    #btn-reset:active { border-color: var(--red); color: var(--red); }
 
     /* Lang dropdown */
     .lang-dropdown { position:relative; }
