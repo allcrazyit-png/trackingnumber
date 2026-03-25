@@ -108,10 +108,10 @@
       .counter-ghost    { display: none; }
 
       /* ── Section 4: Status Card ── */
-      #status-card    { padding: 10px 14px; gap: 3px; flex: 1 1 0; min-height: 64px; overflow: hidden; }
-      #status-msg     { font-size: clamp(0.9rem, 4vw, 1.1rem); letter-spacing: 0; line-height: 1.2; width: 100%; text-align: center; }
-      #status-sub     { font-size: 0.6rem; letter-spacing: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; text-align: center; }
-      .status-eyebrow { display: block; font-size: 0.5rem; }
+      #status-card    { padding: 10px 14px; gap: 2px; flex: 1 1 0; min-height: 64px; overflow: hidden; }
+      #status-msg     { font-size: 1rem; font-weight: 700; letter-spacing: 0; line-height: 1.2; text-transform: none; word-break: break-word; width: 100%; text-align: center; }
+      #status-sub     { font-size: 0.65rem; letter-spacing: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; text-align: center; }
+      .status-eyebrow { display: block; font-size: 0.55rem; letter-spacing: 1px; }
 
       #btn-reset      { padding: 7px 12px; font-size: 0.8rem; }
       footer          { padding: 3px 12px; font-size: 0.6rem; }
@@ -440,8 +440,8 @@
       min-height: 0;
     }
     @media (max-width: 640px) {
-      .history-panel  { flex: 2; min-height: 80px; }
-      .table-scroll   { overflow-y: auto; }
+      .history-panel  { flex: 1 1 0; min-height: 100px; }
+      .table-scroll   { overflow-y: auto; flex: 1; min-height: 0; }
     }
     .history-head {
       padding: 12px 20px;
