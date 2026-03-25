@@ -101,17 +101,17 @@
       main            { padding: 6px 8px; gap: 5px; }
 
       /* ── Section 3: Counters ── */
-      .counters         { gap: 5px; }
-      .counter-panel    { padding: 6px 10px; }
-      .counter-label    { margin-bottom: 1px; font-size: 0.55rem; letter-spacing: 0.5px; line-height: 1.3; white-space: normal; }
-      .counter-num      { font-size: 1.8rem; line-height: 1; }
+      .counters         { gap: 5px; flex-shrink: 0; }
+      .counter-panel    { padding: 5px 10px; }
+      .counter-label    { margin-bottom: 0; font-size: 0.55rem; letter-spacing: 0.5px; line-height: 1.2; white-space: normal; }
+      .counter-num      { font-size: 1.5rem; line-height: 1; }
       .counter-ghost    { display: none; }
 
       /* ── Section 4: Status Card ── */
-      #status-card    { padding: 8px 12px; gap: 2px; flex-shrink: 1; overflow: hidden; }
-      #status-msg     { font-size: clamp(0.65rem, 3vw, 0.8rem); letter-spacing: 0; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; text-align: center; }
-      #status-sub     { font-size: 0.55rem; letter-spacing: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; text-align: center; }
-      .status-eyebrow { display: none; }
+      #status-card    { padding: 10px 14px; gap: 3px; flex: 1 1 0; min-height: 64px; overflow: hidden; }
+      #status-msg     { font-size: clamp(0.9rem, 4vw, 1.1rem); letter-spacing: 0; line-height: 1.2; width: 100%; text-align: center; }
+      #status-sub     { font-size: 0.6rem; letter-spacing: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; text-align: center; }
+      .status-eyebrow { display: block; font-size: 0.5rem; }
 
       #btn-reset      { padding: 7px 12px; font-size: 0.8rem; }
       footer          { padding: 3px 12px; font-size: 0.6rem; }
@@ -439,8 +439,7 @@
       min-height: 0;
     }
     @media (max-width: 640px) {
-      #status-card    { flex-shrink: 1; }
-      .history-panel  { flex: 1; min-height: 120px; }
+      .history-panel  { flex: 2; min-height: 80px; }
       .table-scroll   { overflow-y: auto; }
     }
     .history-head {
@@ -1241,7 +1240,6 @@
       state.countInternal = 0; state.countCustomer = 0;
       state.expectedQty = null; state.pendingSwitch = null;
       state.scannedSerials = new Set();
-      state.scanLogs = []; state.uploadedCount = 0;
       Els.scanCount.textContent       = '0';
       Els.countInternal.textContent   = '0';
       Els.countCustomer.textContent   = '0';
@@ -1271,7 +1269,8 @@
         btn.textContent = '失敗 ✗'; btn.style.borderColor = 'var(--red)'; btn.style.color = 'var(--red)';
         setTimeout(() => { btn.disabled = false; btn.textContent = '↑ 上傳'; btn.style.borderColor = ''; btn.style.color = ''; }, 2500);
       } else {
-        state.uploadedCount = state.scanLogs.length;
+        state.scanLogs.splice(0, state.uploadedCount + newLogs.length);
+        state.uploadedCount = 0;
         btn.textContent = '完成 ✓'; btn.style.borderColor = 'var(--green)'; btn.style.color = 'var(--green)';
         setTimeout(() => { btn.disabled = false; btn.textContent = '↑ 上傳'; btn.style.borderColor = ''; btn.style.color = ''; }, 2000);
       }
