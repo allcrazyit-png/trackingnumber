@@ -138,14 +138,14 @@
 
     /* Reset button */
     #btn-reset {
-      display: flex; align-items: center; gap: 6px;
-      padding: 8px 16px;
+      display: flex; align-items: center; gap: 5px;
+      padding: 6px 12px;
       background: transparent;
       border: 1px solid var(--border);
       border-radius: 6px;
       color: var(--muted);
       font-family: 'Rajdhani', sans-serif;
-      font-size: 0.85rem; font-weight: 600;
+      font-size: 0.8rem; font-weight: 600;
       letter-spacing: 1px; cursor: pointer;
       transition: all 0.15s;
       white-space: nowrap;
@@ -187,11 +187,14 @@
 
     /* Mobile header */
     @media (max-width: 640px) {
-      .ref-pill { display:none; }
-      .divider  { display:none; }
-      #qr-link  { display:none; }
-      .logo-text-sub { display:none; }
-      .scan-counter { display:flex !important; }
+      .ref-pill       { display:none; }
+      .divider        { display:none; }
+      #qr-link        { display:none; }
+      .logo-text-sub  { display:none; }
+      .scan-counter   { display:flex !important; }
+      .lang-label-text { display:none; }
+      .lang-trigger   { padding:7px 10px; font-size:1rem; }
+      #btn-reset      { padding:6px 10px; font-size:0.75rem; letter-spacing:0; }
     }
 
     /* ═══════════════════════════════════════════
@@ -578,7 +581,8 @@
       <!-- 語言選單 dropdown -->
       <div class="lang-dropdown" id="lang-dropdown">
         <button class="lang-trigger" id="lang-trigger" onclick="toggleLangMenu()">
-          <span id="lang-current-label">中文</span>
+          <span id="lang-current-flag">🇹🇼</span>
+          <span id="lang-current-label" class="lang-label-text">中文</span>
           <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
             <path d="M2 4l4 4 4-4"/>
           </svg>
@@ -1200,8 +1204,10 @@
     function toggleLangMenu() {
       document.getElementById('lang-dropdown').classList.toggle('open');
     }
+    const langFlags = { zh:'🇹🇼', vi:'🇻🇳', id:'🇮🇩' };
     function selectLang(code, label) {
       document.getElementById('lang-current-label').textContent = label;
+      document.getElementById('lang-current-flag').textContent = langFlags[code];
       document.getElementById('lang-dropdown').classList.remove('open');
       ['zh','vi','id'].forEach(c => {
         document.getElementById('lang-opt-' + c).classList.toggle('active', c === code);
