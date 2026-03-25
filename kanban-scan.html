@@ -107,12 +107,6 @@
       .counter-num      { font-size: 1.5rem; line-height: 1; }
       .counter-ghost    { display: none; }
 
-      /* ── Section 4: Status Card ── */
-      #status-card    { padding: 10px 14px; gap: 2px; flex: 1 1 0; min-height: 64px; overflow: hidden; }
-      #status-msg     { font-size: 1rem; font-weight: 700; letter-spacing: 0; line-height: 1.2; text-transform: none; word-break: break-word; width: 100%; text-align: center; }
-      #status-sub     { font-size: 0.65rem; letter-spacing: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; text-align: center; }
-      .status-eyebrow { display: block; font-size: 0.55rem; letter-spacing: 1px; }
-
       #btn-reset      { padding: 7px 12px; font-size: 0.8rem; }
       footer          { padding: 3px 12px; font-size: 0.6rem; }
       #ref-badge      { padding: 5px 12px; }
@@ -273,80 +267,6 @@
       width: 100%;
       min-height: 0;
       overflow: hidden;
-    }
-
-    /* ── Status card ───────────────────────── */
-    #status-card {
-      border: 2px solid var(--border);
-      border-radius: 16px;
-      background: var(--card);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 24px 40px;
-      gap: 8px;
-      position: relative;
-      overflow: hidden;
-      flex-shrink: 0;
-      transition: border-color 0.3s, background 0.3s, box-shadow 0.3s;
-    }
-
-    /* Scanline idle animation */
-    #status-card::before {
-      content: '';
-      position: absolute;
-      top: -40%; left: 0; right: 0;
-      height: 40%;
-      background: linear-gradient(to bottom, transparent, rgba(0,136,187,0.06), transparent);
-      animation: scanline 3s linear infinite;
-    }
-    @keyframes scanline {
-      0%   { top: -40%; }
-      100% { top: 140%; }
-    }
-
-    #status-card.state-set {
-      border-color: var(--cyan);
-      box-shadow: 0 0 30px rgba(0,136,187,0.15), inset 0 0 40px rgba(0,136,187,0.05);
-    }
-    #status-card.state-ok {
-      border-color: var(--green);
-      box-shadow: 0 0 30px rgba(0,168,85,0.2), inset 0 0 40px rgba(0,168,85,0.06);
-      animation: ok-pulse 0.4s ease-out;
-    }
-    @keyframes ok-pulse {
-      0%   { box-shadow: 0 0 60px rgba(0,168,85,0.4); }
-      100% { box-shadow: 0 0 30px rgba(0,168,85,0.2); }
-    }
-    #status-card.state-idle { border-color: var(--border); box-shadow: none; }
-
-    .status-eyebrow {
-      font-family: 'Rajdhani', sans-serif;
-      font-size: 0.7rem; font-weight: 600;
-      letter-spacing: 4px; text-transform: uppercase;
-      color: var(--muted);
-    }
-    #status-msg {
-      font-family: 'Rajdhani', sans-serif;
-      font-size: 4.5rem; font-weight: 700;
-      line-height: 1.1; letter-spacing: 2px;
-      text-transform: uppercase;
-      color: var(--text);
-      transition: color 0.2s;
-      text-align: center;
-      word-break: break-word;
-      width: 100%;
-    }
-    #status-msg.state-set   { color: var(--cyan); }
-    #status-msg.state-ok    { color: var(--green); }
-    #status-msg.state-idle  { color: var(--muted); }
-    #status-msg.state-error { color: var(--red); }
-
-    #status-sub {
-      font-size: 0.95rem; color: var(--muted);
-      font-family: 'Rajdhani', sans-serif;
-      letter-spacing: 1px;
     }
 
     /* ── Ref badge (mobile, below status card) ── */
@@ -730,13 +650,6 @@
         </div>
       </div>
 
-      <!-- Status card -->
-      <div id="status-card" class="state-idle">
-        <span class="status-eyebrow" id="status-eyebrow">STANDBY</span>
-        <div id="status-msg" class="state-idle">請掃描看板</div>
-        <div id="status-sub">客戶看板或場內看板皆可先掃</div>
-      </div>
-
       <!-- 基準料號（手機顯示於狀態卡下方） -->
       <div id="ref-badge" class="hidden">
         <span class="ref-badge-label" id="t-refBadgeLabel">基準</span>
@@ -994,10 +907,6 @@
       input:         el('barcode-input'),
       mainView:      el('main-view'),
       alertView:     el('alert-view'),
-      statusCard:    el('status-card'),
-      statusMsg:     el('status-msg'),
-      statusSub:     el('status-sub'),
-      statusEyebrow: el('status-eyebrow'),
       refDisplay:    el('ref-display'),
       scanCount:     el('scan-count'),
       countInternal: el('count-internal'),
@@ -1023,7 +932,7 @@
       const s = toHalf(raw).trim();
       if (s.includes('J004') || s.startsWith('1AC')) {
         const m = s.match(/\sE(.{15})(.{12})/);
-        const qm = s.match(/\s(\d{6})\w?\s*$/);
+        const qm = s.match(/\s(\d+)\w?\s*$/);
         const qty = qm ? parseInt(qm[1], 10) : null;
         if (m) return { kind: 'customer', product: m[2], qty };
         return { kind: 'customer', product: null, qty: null };
@@ -1092,13 +1001,7 @@
     }
 
     // ── 狀態卡 ────────────────────────────────────────────
-    function setCard(st, msg, sub, eyebrow) {
-      Els.statusCard.className = `state-${st}`;
-      Els.statusMsg.className = `state-${st}`;
-      Els.statusMsg.textContent = msg;
-      Els.statusSub.textContent = sub || '';
-      Els.statusEyebrow.textContent = eyebrow || '';
-    }
+    function setCard() {}
 
     function bumpCounter(el) {
       el.style.transform = 'scale(1.15)';
