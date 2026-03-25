@@ -1233,7 +1233,6 @@
 
     // ── 重置 ──────────────────────────────────────────────
     async function doReset() {
-      if (state.total > 0 && !confirm(t('confirmReset'))) return;
       const resetBtn = el('btn-reset');
       resetBtn.blur();
 
