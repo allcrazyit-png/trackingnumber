@@ -100,12 +100,12 @@
       header          { gap: 0; padding: 0; }
       main            { padding: 6px 8px; gap: 5px; }
 
-      /* ── Section 3: Counters ── */
-      .counters       { gap: 5px; }
-      .counter-panel  { padding: 6px 10px; }
-      .counter-label  { margin-bottom: 2px; font-size: 0.6rem; letter-spacing: 1px; line-height: 1.3; white-space: normal; }
-      .counter-num    { font-size: clamp(1.6rem, 8vw, 2.2rem); }
-      .counter-ghost  { display: none; }
+      /* ── Section 3: Counters ── 橫排 */
+      .counters         { gap: 5px; }
+      .counter-panel    { padding: 8px 12px; display: flex; flex-direction: row; align-items: center; justify-content: space-between; }
+      .counter-label    { margin-bottom: 0; font-size: 0.6rem; letter-spacing: 1px; line-height: 1.3; white-space: normal; flex: 1; }
+      .counter-num      { font-size: clamp(1.6rem, 8vw, 2rem); line-height: 1; flex-shrink: 0; }
+      .counter-ghost    { display: none; }
 
       /* ── Section 4: Status Card ── */
       #status-card    { padding: 8px 12px; gap: 2px; flex-shrink: 0; }
