@@ -85,12 +85,17 @@
     }
 
     @media (max-width: 640px) {
-      header { gap: 8px; padding: 8px 12px; }
-      #status-card { padding: 12px 16px; gap: 4px; }
-      #status-msg { font-size: 1.4rem; letter-spacing: 0; }
-      #status-sub { font-size: 0.7rem; letter-spacing: 0; }
+      header          { gap: 8px; padding: 8px 12px; }
+      main            { padding: 12px 12px; gap: 12px; }
+      #status-card    { padding: 20px 16px; gap: 6px; }
+      #status-msg     { font-size: 2.4rem; letter-spacing: 0; }
+      #status-sub     { font-size: 0.75rem; letter-spacing: 0; }
       .status-eyebrow { display: none; }
-      #btn-reset { padding: 7px 12px; font-size: 0.8rem; }
+      #btn-reset      { padding: 7px 12px; font-size: 0.8rem; }
+      .counter-num    { font-size: 5rem; }
+      .counter-ghost  { font-size: 7rem; }
+      .counter-panel  { padding: 16px 20px; }
+      .counters       { gap: 10px; }
     }
 
     .logo {
@@ -650,11 +655,11 @@
           <button class="lang-option active" id="lang-opt-zh" onclick="selectLang('zh','中文')">
             <span class="lang-flag">🇹🇼</span> 中文
           </button>
-          <button class="lang-option" id="lang-opt-vi" onclick="selectLang('vi','Tiếng Việt')">
-            <span class="lang-flag">🇻🇳</span> Tiếng Việt
-          </button>
           <button class="lang-option" id="lang-opt-id" onclick="selectLang('id','Indonesia')">
             <span class="lang-flag">🇮🇩</span> Indonesia
+          </button>
+          <button class="lang-option" id="lang-opt-vi" onclick="selectLang('vi','Tiếng Việt')">
+            <span class="lang-flag">🇻🇳</span> Tiếng Việt
           </button>
         </div>
       </div>
