@@ -108,9 +108,9 @@
       .counter-ghost    { display: none; }
 
       /* ── Section 4: Status Card ── */
-      #status-card    { padding: 8px 12px; gap: 2px; flex-shrink: 1; overflow: visible; }
-      #status-msg     { font-size: clamp(0.85rem, 4.5vw, 1.1rem); letter-spacing: 0; line-height: 1.2; }
-      #status-sub     { font-size: 0.6rem; letter-spacing: 0; }
+      #status-card    { padding: 8px 12px; gap: 2px; flex-shrink: 1; overflow: hidden; }
+      #status-msg     { font-size: clamp(0.65rem, 3vw, 0.8rem); letter-spacing: 0; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; text-align: center; }
+      #status-sub     { font-size: 0.55rem; letter-spacing: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; text-align: center; }
       .status-eyebrow { display: none; }
 
       #btn-reset      { padding: 7px 12px; font-size: 0.8rem; }
@@ -1228,10 +1228,15 @@
     // ── 重置 ──────────────────────────────────────────────
     async function doReset() {
       if (state.total > 0 && !confirm(t('confirmReset'))) return;
+      const resetBtn = el('btn-reset');
       if (state.scanLogs.length > 0) {
+        resetBtn.disabled = true;
+        resetBtn.textContent = '上傳中…';
         const { error } = await _sb.from('kanban_scans').insert(state.scanLogs);
         if (error) {
           alert(`⚠️ 資料上傳失敗：${error.message}\n請截圖此訊息回報。`);
+          resetBtn.disabled = false;
+          resetBtn.innerHTML = `${(LANGS[currentLang]||LANGS.zh).resetBtn} <span style="opacity:.5;font-size:.8em">ESC</span>`;
           return; // 上傳失敗時不重置，避免資料遺失
         }
         console.log(`已上傳 ${state.scanLogs.length} 筆，Session: ${SESSION_ID}`);
