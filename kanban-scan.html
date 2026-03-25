@@ -23,16 +23,24 @@
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+    html { height: 100%; }
     body {
       background: var(--bg);
       color: var(--text);
       font-family: 'DM Sans', sans-serif;
-      min-height: 100vh;
+      height: 100%;
+      overflow: hidden;
       display: flex;
       flex-direction: column;
       /* Dot grid background */
       background-image: radial-gradient(circle, #b8c8db 1px, transparent 1px);
       background-size: 28px 28px;
+    }
+    #main-view {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
     }
 
     .hidden { display: none !important; }
@@ -86,7 +94,7 @@
 
     @media (max-width: 640px) {
       header          { gap: 8px; padding: 8px 12px; }
-      main            { padding: 12px 12px; gap: 12px; }
+      main            { padding: 10px 10px; gap: 8px; }
       #status-card    { padding: 20px 16px; gap: 6px; }
       #status-msg     { font-size: 2.4rem; letter-spacing: 0; }
       #status-sub     { font-size: 0.75rem; letter-spacing: 0; }
@@ -244,11 +252,13 @@
       flex: 1;
       display: flex;
       flex-direction: column;
-      padding: 24px 28px;
-      gap: 20px;
+      padding: 16px 28px;
+      gap: 12px;
       max-width: 1400px;
       margin: 0 auto;
       width: 100%;
+      overflow: hidden;
+      min-height: 0;
     }
 
     /* ── Status card ───────────────────────── */
@@ -260,10 +270,11 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 56px 40px;
-      gap: 12px;
+      padding: 24px 40px;
+      gap: 8px;
       position: relative;
       overflow: hidden;
+      flex-shrink: 0;
       transition: border-color 0.3s, background 0.3s, box-shadow 0.3s;
     }
 
@@ -343,7 +354,8 @@
     .counters {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 20px;
+      gap: 12px;
+      flex-shrink: 0;
     }
 
     .counter-panel {
@@ -400,6 +412,15 @@
       border-radius: 12px;
       background: var(--card);
       overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+    }
+    .table-scroll {
+      overflow-y: auto;
+      flex: 1;
+      min-height: 0;
     }
     .history-head {
       padding: 12px 20px;
@@ -424,6 +445,9 @@
       color: var(--muted);
       text-align: left;
       border-bottom: 1px solid var(--border);
+      position: sticky; top: 0;
+      background: var(--card);
+      z-index: 1;
     }
     tbody tr {
       border-bottom: 1px solid rgba(184,200,219,0.8);
@@ -703,19 +727,21 @@
           <span class="history-head-title" id="t-historyTitle">掃描記錄</span>
           <span id="t-historyRecent" style="font-family:'Rajdhani',sans-serif;font-size:.65rem;color:var(--muted);letter-spacing:2px">最近 10 筆</span>
         </div>
-        <table>
-          <thead>
-            <tr>
-              <th id="t-thTime" style="width:90px">時間</th>
-              <th id="t-thType" class="col-type" style="width:80px">類別</th>
-              <th id="t-thCode">料號</th>
-              <th id="t-thResult" style="width:80px;text-align:right">結果</th>
-            </tr>
-          </thead>
-          <tbody id="scan-history">
-            <tr><td colspan="4" style="padding:24px;text-align:center;color:var(--muted);font-style:italic">尚無記錄</td></tr>
-          </tbody>
-        </table>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th id="t-thTime" style="width:90px">時間</th>
+                <th id="t-thType" class="col-type" style="width:80px">類別</th>
+                <th id="t-thCode">料號</th>
+                <th id="t-thResult" style="width:80px;text-align:right">結果</th>
+              </tr>
+            </thead>
+            <tbody id="scan-history">
+              <tr><td colspan="4" style="padding:24px;text-align:center;color:var(--muted);font-style:italic">尚無記錄</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </main>
 
