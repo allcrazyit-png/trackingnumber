@@ -770,6 +770,12 @@
     <footer>
       <span>瑞全企業 · 看板比對系統 v2.1 ·<span id="last-raw" style="color:var(--cyan)">---</span></span>
       <div class="footer-right">
+        <button id="btn-upload" onclick="doUpload()" style="
+          padding:3px 10px; font-size:0.65rem; font-family:'Rajdhani',sans-serif;
+          background:transparent; border:1px solid rgba(0,200,255,0.35);
+          border-radius:6px; color:var(--cyan); cursor:pointer; letter-spacing:0.5px;
+          transition:all 0.15s;
+        ">↑ 上傳</button>
         <span id="status-dot-text">系統就緒</span>
       </div>
     </footer>
@@ -981,7 +987,7 @@
 
     const state = { ref: null, total: 0, countInternal: 0, countCustomer: 0,
                     expectedQty: null, pendingSwitch: null, scannedSerials: new Set(),
-                    scanLogs: [] };
+                    scanLogs: [], uploadedCount: 0 };
 
     const el  = id => document.getElementById(id);
     const Els = {
@@ -1230,24 +1236,12 @@
       if (state.total > 0 && !confirm(t('confirmReset'))) return;
       const resetBtn = el('btn-reset');
       resetBtn.blur();
-      if (state.scanLogs.length > 0) {
-        resetBtn.disabled = true;
-        resetBtn.textContent = '上傳中…';
-        const { error } = await _sb.from('kanban_scans').insert(state.scanLogs);
-        if (error) {
-          alert(`⚠️ 資料上傳失敗：${error.message}\n請截圖此訊息回報。`);
-          resetBtn.disabled = false;
-          resetBtn.innerHTML = `${(LANGS[currentLang]||LANGS.zh).resetBtn} <span style="opacity:.5;font-size:.8em">ESC</span>`;
-          return; // 上傳失敗時不重置，避免資料遺失
-        }
-        console.log(`已上傳 ${state.scanLogs.length} 筆，Session: ${SESSION_ID}`);
-      }
 
       state.ref = null; state.total = 0;
       state.countInternal = 0; state.countCustomer = 0;
       state.expectedQty = null; state.pendingSwitch = null;
       state.scannedSerials = new Set();
-      state.scanLogs = [];
+      state.scanLogs = []; state.uploadedCount = 0;
       Els.scanCount.textContent       = '0';
       Els.countInternal.textContent   = '0';
       Els.countCustomer.textContent   = '0';
@@ -1265,6 +1259,24 @@
       if (!isMobile) Els.input.focus();
     }
     el('btn-reset').onclick = doReset;
+
+    // ── 上傳（不重置）──────────────────────────────────────
+    async function doUpload() {
+      const btn = el('btn-upload');
+      const newLogs = state.scanLogs.slice(state.uploadedCount);
+      if (!newLogs.length) { btn.textContent = '無新資料'; setTimeout(() => { btn.textContent = '↑ 上傳'; }, 1500); return; }
+      btn.disabled = true; btn.textContent = '上傳中…';
+      const { error } = await _sb.from('kanban_scans').insert(newLogs);
+      if (error) {
+        btn.textContent = '失敗 ✗'; btn.style.borderColor = 'var(--red)'; btn.style.color = 'var(--red)';
+        setTimeout(() => { btn.disabled = false; btn.textContent = '↑ 上傳'; btn.style.borderColor = ''; btn.style.color = ''; }, 2500);
+      } else {
+        state.uploadedCount = state.scanLogs.length;
+        btn.textContent = '完成 ✓'; btn.style.borderColor = 'var(--green)'; btn.style.color = 'var(--green)';
+        setTimeout(() => { btn.disabled = false; btn.textContent = '↑ 上傳'; btn.style.borderColor = ''; btn.style.color = ''; }, 2000);
+      }
+    }
+    window.doUpload = doUpload;
 
     // ── 歷史 ──────────────────────────────────────────────
     function addHistory(product, kindLabel, kind, result, raw) {
