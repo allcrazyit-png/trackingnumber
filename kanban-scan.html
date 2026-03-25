@@ -55,6 +55,7 @@
       display: flex; align-items: baseline; gap: 10px;
       padding: 6px 20px;
       background: var(--cyan);
+      position: sticky; top: 0; z-index: 11;
     }
     .company-name {
       font-family: 'Rajdhani', sans-serif;
@@ -227,6 +228,8 @@
       /* 桌機顯示的 ref-pill 在手機完全不佔空間 */
       .ref-pill       { display:none !important; }
       .company-bar    { display:none; }
+      /* 表格隱藏類別欄 */
+      .col-type       { display:none; }
     }
 
     /* ═══════════════════════════════════════════
@@ -296,7 +299,7 @@
     }
     #status-msg {
       font-family: 'Rajdhani', sans-serif;
-      font-size: 3.5rem; font-weight: 700;
+      font-size: 4.5rem; font-weight: 700;
       line-height: 1; letter-spacing: 2px;
       text-transform: uppercase;
       color: var(--text);
@@ -305,12 +308,31 @@
     #status-msg.state-set   { color: var(--cyan); }
     #status-msg.state-ok    { color: var(--green); }
     #status-msg.state-idle  { color: var(--muted); }
+    #status-msg.state-error { color: var(--red); }
 
     #status-sub {
       font-size: 0.95rem; color: var(--muted);
       font-family: 'Rajdhani', sans-serif;
       letter-spacing: 1px;
     }
+
+    /* ── Ref badge (mobile, below status card) ── */
+    #ref-badge {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--card); border: 1px solid rgba(0,136,187,0.4);
+      border-radius: 8px; padding: 8px 16px;
+    }
+    .ref-badge-label {
+      font-family: 'Rajdhani', sans-serif; font-size: 0.7rem; font-weight: 700;
+      letter-spacing: 2px; text-transform: uppercase; color: var(--muted);
+      white-space: nowrap;
+    }
+    #ref-badge-val {
+      font-family: 'JetBrains Mono', monospace; font-weight: 700;
+      font-size: 1rem; color: var(--cyan); letter-spacing: 2px;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    @media (min-width: 641px) { #ref-badge { display: none !important; } }
 
     /* ── Counter panels ────────────────────── */
     .counters {
@@ -329,6 +351,7 @@
     }
     .counter-panel.internal { border-color: rgba(0,136,187,0.35); }
     .counter-panel.customer { border-color: rgba(224,90,0,0.35); }
+    .counter-panel.mismatch { border-color: var(--amber) !important; box-shadow: 0 0 16px rgba(200,120,0,0.2); }
 
     .counter-label {
       display: flex; align-items: center; gap: 8px;
@@ -348,7 +371,7 @@
 
     .counter-num {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 5rem; font-weight: 800;
+      font-size: 8rem; font-weight: 800;
       line-height: 1;
       transition: transform 0.1s;
     }
@@ -663,6 +686,12 @@
         <div id="status-sub">客戶看板或場內看板皆可先掃</div>
       </div>
 
+      <!-- 基準料號（手機顯示於狀態卡下方） -->
+      <div id="ref-badge" class="hidden">
+        <span class="ref-badge-label" id="t-refBadgeLabel">基準</span>
+        <span id="ref-badge-val">---</span>
+      </div>
+
       <!-- History -->
       <div class="history-panel">
         <div class="history-head">
@@ -673,7 +702,7 @@
           <thead>
             <tr>
               <th id="t-thTime" style="width:90px">時間</th>
-              <th id="t-thType" style="width:80px">類別</th>
+              <th id="t-thType" class="col-type" style="width:80px">類別</th>
               <th id="t-thCode">料號</th>
               <th id="t-thResult" style="width:80px;text-align:right">結果</th>
             </tr>
@@ -796,6 +825,7 @@
         btnSwitchConfirm:'確認換批次', alertResolveSwitch:'返回繼續',
         alertDupTitle:'⚠ 重複掃描警報', alertDupHeadline:'同一張看板掃了兩次',
         alertDupRefLabel:'當前批次料號', alertDupSerialLabel:'重複序號',
+        confirmReset:'確定要重置？本批次資料將上傳並清除。',
       },
       vi: {
         logo:'So Sánh Kanban', refLabel:'Mã Chuẩn', refEmpty:'Chưa quét',
@@ -819,6 +849,7 @@
         btnSwitchConfirm:'Xác nhận đổi lô', alertResolveSwitch:'Quay lại tiếp tục',
         alertDupTitle:'⚠ CẢNH BÁO — Quét trùng', alertDupHeadline:'Kanban này đã được quét',
         alertDupRefLabel:'Mã lô hiện tại', alertDupSerialLabel:'Số serial trùng',
+        confirmReset:'Xác nhận đặt lại? Dữ liệu lô này sẽ được tải lên và xóa.',
       },
       id: {
         logo:'Verifikasi Kanban', refLabel:'Kode Referensi', refEmpty:'Belum discan',
@@ -842,6 +873,7 @@
         btnSwitchConfirm:'Konfirmasi ganti batch', alertResolveSwitch:'Kembali lanjutkan',
         alertDupTitle:'⚠ PERINGATAN — Scan duplikat', alertDupHeadline:'Kanban ini sudah pernah discan',
         alertDupRefLabel:'Kode batch saat ini', alertDupSerialLabel:'Serial duplikat',
+        confirmReset:'Konfirmasi reset? Data batch ini akan diunggah dan dihapus.',
       },
     };
 
@@ -1010,6 +1042,11 @@
         Els.ghostCustomer.textContent = state.countCustomer;
         bumpCounter(Els.countCustomer);
       }
+      // 兩邊不一致時加警示邊框
+      const mismatch = state.countInternal > 0 && state.countCustomer > 0
+                    && state.countInternal !== state.countCustomer;
+      document.querySelector('.counter-panel.internal').classList.toggle('mismatch', mismatch);
+      document.querySelector('.counter-panel.customer').classList.toggle('mismatch', mismatch);
     }
 
     function startNewBatch(product, kind, kindLabel, qty, sound = 'ok', raw = '') {
@@ -1022,6 +1059,8 @@
       Els.countCustomer.textContent = '0'; Els.ghostCustomer.textContent = '0';
       Els.refDisplay.textContent = product;
       Els.refDisplay.classList.remove('empty');
+      document.getElementById('ref-badge-val').textContent = product;
+      document.getElementById('ref-badge').classList.remove('hidden');
       // 第一張計入 1
       state.total = 1;
       updateCountDisplay(kind);
@@ -1119,6 +1158,7 @@
 
     // ── 重置 ──────────────────────────────────────────────
     async function doReset() {
+      if (state.total > 0 && !confirm(t('confirmReset'))) return;
       if (state.scanLogs.length > 0) {
         const { error } = await _sb.from('kanban_scans').insert(state.scanLogs);
         if (error) {
@@ -1140,6 +1180,9 @@
       Els.ghostCustomer.textContent   = '0';
       Els.refDisplay.innerHTML        = t('refEmpty');
       Els.refDisplay.className        = 'empty';
+      document.getElementById('ref-badge').classList.add('hidden');
+      document.querySelector('.counter-panel.internal').classList.remove('mismatch');
+      document.querySelector('.counter-panel.customer').classList.remove('mismatch');
       Els.dotText.textContent         = t('sysReady');
       Els.historyBody.innerHTML       = `<tr><td colspan="4" style="padding:24px;text-align:center;color:var(--muted);font-style:italic">${t('historyEmpty')}</td></tr>`;
       Els.lastRaw.textContent         = '---';
@@ -1165,7 +1208,7 @@
       const row = document.createElement('tr');
       row.innerHTML =
         `<td class="td-time">${now}</td>` +
-        `<td>${badge}</td>` +
+        `<td class="col-type">${badge}</td>` +
         `<td class="td-product">${product || '?'}</td>` +
         `<td>${res}</td>`;
       Els.historyBody.insertBefore(row, Els.historyBody.firstChild);
