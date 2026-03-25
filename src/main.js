@@ -1,20 +1,12 @@
 import { supabase } from './supabase.js'
+import NoSleep from 'nosleep.js'
 
-// 防止螢幕自動關閉 (Wake Lock API)
-async function requestWakeLock() {
-    if ('wakeLock' in navigator) {
-        try {
-            await navigator.wakeLock.request('screen');
-        } catch (err) {
-            console.warn('Wake Lock 無法啟用:', err);
-        }
-    }
-}
-// 頁面重新可見時重新取得 Wake Lock（切換 App 後回來）
+// 防止螢幕自動變暗／鎖定（Wake Lock API + iOS 影片備援）
+const noSleep = new NoSleep();
+document.addEventListener('click', () => noSleep.enable(), { once: true });
 document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') requestWakeLock();
+    if (document.visibilityState === 'visible' && !noSleep.isEnabled) noSleep.enable();
 });
-requestWakeLock();
 
 // 產生任務 session ID
 function generateSessionId() {
