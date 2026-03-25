@@ -8,17 +8,17 @@
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@400;700;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg:      #060c18;
-      --surface: #0b1424;
-      --card:    #0f1a2e;
-      --border:  #1a2d4a;
-      --text:    #c8d6ec;
-      --muted:   #3d5470;
-      --cyan:    #00c8ff;
-      --green:   #00e676;
-      --red:     #ff1744;
-      --orange:  #ff6d00;
-      --amber:   #ffab00;
+      --bg:      #eef2f7;
+      --surface: #e2e8f0;
+      --card:    #ffffff;
+      --border:  #b8c8db;
+      --text:    #0f1a2e;
+      --muted:   #5a7490;
+      --cyan:    #0088bb;
+      --green:   #00a855;
+      --red:     #e8001a;
+      --orange:  #e05a00;
+      --amber:   #c87800;
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -31,7 +31,7 @@
       display: flex;
       flex-direction: column;
       /* Dot grid background */
-      background-image: radial-gradient(circle, #1a2d4a 1px, transparent 1px);
+      background-image: radial-gradient(circle, #b8c8db 1px, transparent 1px);
       background-size: 28px 28px;
     }
 
@@ -58,7 +58,7 @@
       align-items: center;
       gap: 12px;
       padding: 10px 16px;
-      background: rgba(11,20,36,0.95);
+      background: rgba(255,255,255,0.95);
       border-bottom: 1px solid var(--border);
       backdrop-filter: blur(8px);
       position: sticky; top: 0; z-index: 10;
@@ -163,7 +163,7 @@
       transition:all .2s;
     }
     .lang-btn:hover { border-color:rgba(255,255,255,.2); color:var(--text); }
-    .lang-btn.active { border-color:var(--cyan); color:var(--cyan); background:rgba(0,200,255,.08); }
+    .lang-btn.active { border-color:var(--cyan); color:var(--cyan); background:rgba(0,136,187,.1); }
 
     /* ═══════════════════════════════════════════
        MAIN
@@ -201,7 +201,7 @@
       position: absolute;
       top: -40%; left: 0; right: 0;
       height: 40%;
-      background: linear-gradient(to bottom, transparent, rgba(0,200,255,0.04), transparent);
+      background: linear-gradient(to bottom, transparent, rgba(0,136,187,0.06), transparent);
       animation: scanline 3s linear infinite;
     }
     @keyframes scanline {
@@ -211,16 +211,16 @@
 
     #status-card.state-set {
       border-color: var(--cyan);
-      box-shadow: 0 0 40px rgba(0,200,255,0.12), inset 0 0 60px rgba(0,200,255,0.04);
+      box-shadow: 0 0 30px rgba(0,136,187,0.15), inset 0 0 40px rgba(0,136,187,0.05);
     }
     #status-card.state-ok {
       border-color: var(--green);
-      box-shadow: 0 0 40px rgba(0,230,118,0.15), inset 0 0 60px rgba(0,230,118,0.05);
+      box-shadow: 0 0 30px rgba(0,168,85,0.2), inset 0 0 40px rgba(0,168,85,0.06);
       animation: ok-pulse 0.4s ease-out;
     }
     @keyframes ok-pulse {
-      0%   { box-shadow: 0 0 80px rgba(0,230,118,0.5); }
-      100% { box-shadow: 0 0 40px rgba(0,230,118,0.15); }
+      0%   { box-shadow: 0 0 60px rgba(0,168,85,0.4); }
+      100% { box-shadow: 0 0 30px rgba(0,168,85,0.2); }
     }
     #status-card.state-idle { border-color: var(--border); box-shadow: none; }
 
@@ -263,8 +263,8 @@
       position: relative;
       overflow: hidden;
     }
-    .counter-panel.internal { border-color: rgba(0,200,255,0.25); }
-    .counter-panel.customer { border-color: rgba(255,109,0,0.25); }
+    .counter-panel.internal { border-color: rgba(0,136,187,0.35); }
+    .counter-panel.customer { border-color: rgba(224,90,0,0.35); }
 
     .counter-label {
       display: flex; align-items: center; gap: 8px;
@@ -311,7 +311,7 @@
     }
     .history-head {
       padding: 12px 20px;
-      background: rgba(26,45,74,0.4);
+      background: rgba(184,200,219,0.3);
       border-bottom: 1px solid var(--border);
       display: flex; justify-content: space-between; align-items: center;
     }
@@ -334,11 +334,11 @@
       border-bottom: 1px solid var(--border);
     }
     tbody tr {
-      border-bottom: 1px solid rgba(26,45,74,0.6);
+      border-bottom: 1px solid rgba(184,200,219,0.8);
       transition: background 0.15s;
     }
     tbody tr:last-child { border-bottom: none; }
-    tbody tr:hover { background: rgba(26,45,74,0.4); }
+    tbody tr:hover { background: rgba(184,200,219,0.3); }
     td {
       padding: 8px 20px;
       font-size: 0.85rem;
@@ -352,8 +352,8 @@
       font-family: 'Rajdhani', sans-serif;
       font-size: 0.65rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
     }
-    .badge-i { background: rgba(0,200,255,0.12); color: var(--cyan); border: 1px solid rgba(0,200,255,0.25); }
-    .badge-c { background: rgba(255,109,0,0.12); color: var(--orange); border: 1px solid rgba(255,109,0,0.25); }
+    .badge-i { background: rgba(0,136,187,0.1); color: var(--cyan); border: 1px solid rgba(0,136,187,0.3); }
+    .badge-c { background: rgba(224,90,0,0.1); color: var(--orange); border: 1px solid rgba(224,90,0,0.3); }
 
     .res-ok    { color: var(--green); }
     .res-set   { color: var(--cyan); }
@@ -361,7 +361,7 @@
 
     /* ── Status bar ────────────────────────── */
     footer {
-      background: rgba(6,12,24,0.95);
+      background: rgba(255,255,255,0.95);
       border-top: 1px solid var(--border);
       padding: 5px 28px;
       display: flex; justify-content: space-between; align-items: center;
@@ -458,8 +458,8 @@
       width: 100%;
     }
     .alert-code-box.expected {
-      border-color: rgba(255,255,255,0.2);
-      background: rgba(255,255,255,0.04);
+      border-color: rgba(255,255,255,0.3);
+      background: rgba(255,255,255,0.08);
     }
     .alert-code-box.wrong {
       border-color: rgba(255,23,68,0.5);
@@ -544,11 +544,11 @@
 
       <button id="btn-reset">⟳ 重置 <span style="opacity:.5;font-size:.8em">ESC</span></button>
 
-      <a id="qr-link" href="qr-gen.html" style="margin-left:8px;padding:8px 16px;border:1px solid rgba(0,200,255,0.3);
+      <a id="qr-link" href="qr-gen.html" style="margin-left:8px;padding:8px 16px;border:1px solid rgba(0,136,187,0.4);
          border-radius:8px;color:var(--cyan);font-family:'Rajdhani',sans-serif;font-size:0.8rem;
          font-weight:700;letter-spacing:2px;text-transform:uppercase;text-decoration:none;
          white-space:nowrap;transition:all .2s;"
-         onmouseover="this.style.background='rgba(0,200,255,0.08)'"
+         onmouseover="this.style.background='rgba(0,136,187,0.1)'"
          onmouseout="this.style.background=''">
         QR 產生器 →
       </a>
