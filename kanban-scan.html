@@ -23,16 +23,15 @@
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    html { height: 100%; height: 100dvh; }
+    html { height: 100%; }
     body {
       background: var(--bg);
       color: var(--text);
       font-family: 'DM Sans', sans-serif;
-      height: var(--app-height, 100dvh);
-      max-height: var(--app-height, 100dvh);
+      min-height: 100%;
       display: flex;
       flex-direction: column;
-      overflow: hidden;
+      overflow-x: hidden;
       /* Dot grid background */
       background-image: radial-gradient(circle, #b8c8db 1px, transparent 1px);
       background-size: 28px 28px;
@@ -42,7 +41,6 @@
       display: flex;
       flex-direction: column;
       min-height: 0;
-      overflow: hidden;
     }
 
     .hidden { display: none !important; }
@@ -98,20 +96,20 @@
       .company-name   { font-size: 0.8rem; letter-spacing: 2px; }
       .company-sub    { font-size: 0.6rem; }
       header          { gap: 0; padding: 0; }
-      main            { padding: 6px 8px; gap: 5px; }
-      #status-card    { padding: 8px 12px; gap: 2px; }
-      #status-msg     { font-size: 1.6rem; letter-spacing: 0; }
-      #status-sub     { font-size: 0.65rem; letter-spacing: 0; }
+      main            { padding: 10px 10px; gap: 8px; }
+      #status-card    { padding: 12px 14px; gap: 4px; }
+      #status-msg     { font-size: clamp(1.1rem, 7vw, 1.8rem); letter-spacing: 0; }
+      #status-sub     { font-size: 0.7rem; letter-spacing: 0; }
       .status-eyebrow { display: none; }
       #btn-reset      { padding: 7px 12px; font-size: 0.8rem; }
-      .counter-num    { font-size: 2.5rem; }
-      .counter-ghost  { font-size: 3.5rem; }
-      .counter-label  { margin-bottom: 2px; font-size: 0.65rem; }
-      .counter-panel  { padding: 8px 10px; }
-      .counters       { gap: 6px; }
-      footer          { padding: 3px 12px; font-size: 0.6rem; }
-      #ref-badge      { padding: 4px 10px; }
-      #ref-badge-val  { font-size: 0.85rem; }
+      .counter-num    { font-size: clamp(2rem, 10vw, 3rem); }
+      .counter-ghost  { font-size: clamp(3rem, 14vw, 4.5rem); }
+      .counter-label  { margin-bottom: 4px; font-size: 0.65rem; letter-spacing: 1px; line-height: 1.3; white-space: normal; }
+      .counter-panel  { padding: 10px 12px; }
+      .counters       { gap: 8px; }
+      footer          { padding: 4px 12px; font-size: 0.6rem; }
+      #ref-badge      { padding: 6px 12px; }
+      #ref-badge-val  { font-size: 0.9rem; }
     }
 
     .logo {
@@ -266,7 +264,6 @@
       margin: 0 auto;
       width: 100%;
       min-height: 0;
-      overflow: hidden;
     }
 
     /* ── Status card ───────────────────────── */
@@ -324,10 +321,13 @@
     #status-msg {
       font-family: 'Rajdhani', sans-serif;
       font-size: 4.5rem; font-weight: 700;
-      line-height: 1; letter-spacing: 2px;
+      line-height: 1.1; letter-spacing: 2px;
       text-transform: uppercase;
       color: var(--text);
       transition: color 0.2s;
+      text-align: center;
+      word-break: break-word;
+      width: 100%;
     }
     #status-msg.state-set   { color: var(--cyan); }
     #status-msg.state-ok    { color: var(--green); }
@@ -429,6 +429,10 @@
       overflow-y: auto;
       flex: 1;
       min-height: 0;
+    }
+    @media (max-width: 640px) {
+      .history-panel { flex: none; }
+      .table-scroll  { overflow-y: visible; max-height: none; }
     }
     .history-head {
       padding: 12px 20px;
