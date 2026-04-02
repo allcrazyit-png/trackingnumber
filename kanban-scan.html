@@ -915,13 +915,6 @@
       if (state.ref === null) {
         startNewBatch(product, kind, kindLabel, qty, 'ok', raw);
       } else if (product === state.ref) {
-        // 重複序號檢查
-        if (serial && state.scannedSerials.has(serial)) {
-          addHistory(product, kindLabel, kind, 'error', raw);
-          beep('error');
-          triggerDuplicateAlert(serial);
-          return;
-        }
         // 只有正確才計數
         state.total++;
         if (serial) state.scannedSerials.add(serial);
