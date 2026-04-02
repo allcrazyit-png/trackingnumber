@@ -441,136 +441,82 @@
     ═══════════════════════════════════════════ */
     #alert-view {
       position: fixed; inset: 0; z-index: 100;
-      background: #0d0003;
-      display: flex; flex-direction: column;
-      animation: alert-in 0.2s ease-out;
+      display: flex; align-items: center; justify-content: center;
+      padding: 16px;
+      background: rgba(0,0,0,0.55);
+      backdrop-filter: blur(2px);
+      animation: alert-in 0.15s ease-out;
     }
     @keyframes alert-in {
-      from { opacity: 0; transform: scale(1.02); }
+      from { opacity: 0; transform: scale(0.97); }
       to   { opacity: 1; transform: scale(1); }
     }
 
-    /* Pulsing red radial */
-    #alert-view::before {
-      content: '';
-      position: absolute; inset: 0;
-      background: radial-gradient(ellipse at center, rgba(255,23,68,0.25) 0%, transparent 70%);
-      animation: alert-pulse 1.2s ease-in-out infinite alternate;
-      pointer-events: none;
-    }
-    @keyframes alert-pulse {
-      from { opacity: 0.5; }
-      to   { opacity: 1; }
+    .alert-card {
+      background: #110408;
+      border: 1.5px solid rgba(255,23,68,0.6);
+      border-radius: 14px;
+      box-shadow: 0 0 40px rgba(255,23,68,0.2), 0 8px 32px rgba(0,0,0,0.6);
+      width: 100%; max-width: 360px;
+      overflow: hidden;
     }
 
     .alert-header {
-      padding: 16px 40px;
-      border-bottom: 1px solid rgba(255,23,68,0.3);
-      display: flex; align-items: center; gap: 12px;
-      position: relative;
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(255,23,68,0.2);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .alert-blink {
+      width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+      background: var(--red); box-shadow: 0 0 8px var(--red);
+      animation: blink 0.6s infinite;
     }
     .alert-header-title {
       font-family: 'Rajdhani', sans-serif;
-      font-size: 0.8rem; font-weight: 700;
-      letter-spacing: 4px; text-transform: uppercase;
-      color: rgba(255,100,120,0.8);
-    }
-    .alert-blink {
-      width: 8px; height: 8px; border-radius: 50%;
-      background: var(--red);
-      box-shadow: 0 0 12px var(--red);
-      animation: blink 0.6s infinite;
-    }
-
-    .alert-main {
-      flex: 1;
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      padding: 24px 16px;
-      gap: 24px;
-      position: relative;
-      overflow-y: auto;
-    }
-
-    .alert-headline {
-      font-family: 'Rajdhani', sans-serif;
-      font-size: clamp(2.5rem, 10vw, 5rem); font-weight: 700;
-      color: var(--red);
-      letter-spacing: 4px; text-transform: uppercase;
-      text-align: center;
-      text-shadow: 0 0 40px rgba(255,23,68,0.6);
-    }
-
-    .alert-codes {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      align-items: center;
-      width: 100%; max-width: 600px;
-    }
-    .alert-code-box {
-      border: 2px solid;
-      border-radius: 12px;
-      padding: 16px 20px;
-      text-align: center;
-      width: 100%;
-    }
-    .alert-code-box.expected {
-      border-color: rgba(255,255,255,0.3);
-      background: rgba(255,255,255,0.08);
-    }
-    .alert-code-box.wrong {
-      border-color: rgba(255,23,68,0.5);
-      background: rgba(255,23,68,0.08);
-    }
-    .alert-code-label {
-      font-family: 'Rajdhani', sans-serif;
-      font-size: 0.7rem; font-weight: 700;
+      font-size: 0.75rem; font-weight: 700;
       letter-spacing: 3px; text-transform: uppercase;
-      margin-bottom: 8px;
+      color: rgba(255,100,120,0.9);
     }
-    .expected .alert-code-label { color: rgba(255,255,255,0.4); }
-    .wrong .alert-code-label    { color: var(--red); }
-    .alert-code-val {
+
+    .alert-body {
+      padding: 16px;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+
+    .al-row {
+      display: flex; align-items: baseline; gap: 10px;
+    }
+    .al-label {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.65rem; font-weight: 700; letter-spacing: 2px;
+      text-transform: uppercase; color: var(--muted);
+      flex-shrink: 0; width: 36px;
+    }
+    .al-label.err { color: var(--red); }
+    .al-val {
       font-family: 'JetBrains Mono', monospace;
-      font-weight: 800;
-      font-size: clamp(1.2rem, 5vw, 2rem);
-      letter-spacing: 2px;
-      word-break: break-all;
+      font-size: 1rem; font-weight: 700; letter-spacing: 1px;
+      color: var(--text); word-break: break-all;
     }
-    .expected .alert-code-val { color: #e8edf5; }
-    .wrong .alert-code-val    { color: var(--red); text-shadow: 0 0 20px rgba(255,23,68,0.5); }
+    .al-val.err { color: var(--red); }
+    .al-val.cyan { color: var(--cyan); }
 
-    .alert-vs {
-      font-family: 'Rajdhani', sans-serif;
-      font-size: 1.2rem; font-weight: 700;
-      color: var(--muted); letter-spacing: 2px;
+    .alert-divider { height: 1px; background: rgba(255,255,255,0.06); margin: 4px 0; }
+
+    .alert-btns {
+      padding: 0 16px 14px;
+      display: flex; gap: 8px;
     }
-
     #btn-resolve {
-      padding: 16px 32px;
-      width: 100%; max-width: 600px;
+      flex: 1; padding: 10px;
       background: transparent;
-      border: 2px solid rgba(255,23,68,0.5);
-      border-radius: 10px;
-      color: var(--red);
+      border: 1px solid rgba(255,23,68,0.4);
+      border-radius: 8px; color: var(--red);
       font-family: 'Rajdhani', sans-serif;
-      font-size: clamp(0.9rem, 4vw, 1.2rem); font-weight: 700;
-      letter-spacing: 3px; text-transform: uppercase;
-      cursor: pointer;
-      transition: all 0.2s;
+      font-size: 0.8rem; font-weight: 700; letter-spacing: 2px;
+      text-transform: uppercase; cursor: pointer; transition: all 0.15s;
     }
-    #btn-resolve:hover {
-      background: rgba(255,23,68,0.1);
-      border-color: var(--red);
-      box-shadow: 0 0 30px rgba(255,23,68,0.2);
-    }
-    #btn-resolve:active { transform: scale(0.97); }
-
-    @media (max-width: 640px) {
-      .alert-header { padding: 12px 16px; }
-      .alert-header-title { font-size: 0.7rem; letter-spacing: 2px; }
-    }
+    #btn-resolve:active { background: rgba(255,23,68,0.1); }
   </style>
 </head>
 
@@ -696,46 +642,48 @@
 
   <!-- ════════ ALERT VIEW ════════ -->
   <div id="alert-view" class="hidden">
-    <div class="alert-header">
-      <div class="alert-blink"></div>
-      <span class="alert-header-title" id="t-alertTitle">⚠ MISMATCH DETECTED — 料號不符警報</span>
-    </div>
-    <div class="alert-main">
-      <div class="alert-headline" id="t-alertHeadline">料號不符</div>
-      <!-- 料號不符 -->
-      <div class="alert-codes" id="alert-codes-mismatch">
-        <div class="alert-code-box expected">
-          <div class="alert-code-label" id="t-alertExpectedLabel">基準料號（正確）</div>
-          <div class="alert-code-val" id="alert-expected">---</div>
+    <div class="alert-card">
+      <div class="alert-header">
+        <div class="alert-blink"></div>
+        <span class="alert-header-title" id="t-alertTitle">料號不符</span>
+      </div>
+      <div class="alert-body">
+        <!-- 料號不符 / 重複序號 -->
+        <div id="alert-codes-mismatch">
+          <div class="al-row">
+            <span class="al-label" id="t-alertExpectedLabel">基準</span>
+            <span class="al-val" id="alert-expected">---</span>
+          </div>
+          <div class="al-row">
+            <span class="al-label err" id="t-alertWrongLabel">掃到</span>
+            <span class="al-val err" id="alert-scanned">---</span>
+          </div>
         </div>
-        <div class="alert-vs">≠</div>
-        <div class="alert-code-box wrong">
-          <div class="alert-code-label" id="t-alertWrongLabel">掃到的料號（錯誤）</div>
-          <div class="alert-code-val" id="alert-scanned">---</div>
+        <!-- 張數不符換批次 -->
+        <div id="alert-codes-switch" style="display:none">
+          <div class="al-row">
+            <span class="al-label">場內</span>
+            <span class="al-val" id="alert-actual-count">---</span>
+          </div>
+          <div class="al-row">
+            <span class="al-label err">客戶</span>
+            <span class="al-val err" id="alert-expected-count">---</span>
+          </div>
+        </div>
+        <div id="alert-new-product-row" style="display:none">
+          <div class="alert-divider"></div>
+          <div class="al-row" style="margin-top:8px">
+            <span class="al-label">新批</span>
+            <span class="al-val cyan" id="alert-new-product-val">---</span>
+          </div>
         </div>
       </div>
-      <!-- 數量不足換批次 -->
-      <div class="alert-codes" id="alert-codes-switch" style="display:none">
-        <div class="alert-code-box expected">
-          <div class="alert-code-label" id="t-alertActualLabel">已完成張數</div>
-          <div class="alert-code-val" id="alert-actual-count" style="color:#fff">---</div>
-        </div>
-        <div class="alert-vs">/</div>
-        <div class="alert-code-box wrong">
-          <div class="alert-code-label" id="t-alertExpectedQtyLabel">應出張數</div>
-          <div class="alert-code-val" id="alert-expected-count">---</div>
-        </div>
-      </div>
-      <div id="alert-new-product-row" style="display:none;text-align:center;">
-        <div style="font-size:0.7rem;letter-spacing:3px;color:var(--muted);margin-bottom:8px;" id="t-alertNewProductLabel">新批次番號</div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:1.4rem;font-weight:800;color:var(--cyan);letter-spacing:2px;" id="alert-new-product-val">---</div>
-      </div>
-      <div style="display:flex;gap:14px;flex-wrap:wrap;justify-content:center;">
-        <button id="btn-resolve"><span id="t-alertResolve">確認處理完畢，解除警報</span></button>
-        <button id="btn-switch-confirm" style="display:none;padding:18px 32px;background:var(--cyan);
-          border:none;border-radius:10px;color:#0d1421;font-family:'Rajdhani',sans-serif;
-          font-size:clamp(0.9rem,4vw,1.2rem);font-weight:700;letter-spacing:3px;
-          text-transform:uppercase;cursor:pointer;transition:all .2s;">
+      <div class="alert-btns">
+        <button id="btn-resolve"><span id="t-alertResolve">解除</span></button>
+        <button id="btn-switch-confirm" style="display:none;flex:1;padding:10px;
+          background:var(--cyan);border:none;border-radius:8px;color:#0d1421;
+          font-family:'Rajdhani',sans-serif;font-size:0.8rem;font-weight:700;
+          letter-spacing:2px;text-transform:uppercase;cursor:pointer;">
           <span id="t-btnSwitchConfirm">確認換批次</span>
         </button>
       </div>
@@ -1067,11 +1015,9 @@
       document.getElementById('btn-switch-confirm').style.display   = 'none';
       document.getElementById('t-alertResolve').textContent = t('alertResolve');
       document.getElementById('t-alertTitle').textContent   = t('alertTitle');
-      document.getElementById('t-alertHeadline').textContent = t('alertHeadline');
       Els.alertExpected.textContent = state.ref;
       Els.alertScanned.textContent  = wrongProduct;
       Els.alertView.classList.remove('hidden');
-      Els.mainView.classList.add('hidden');
       stopAlertSound();
       playAlertSound();
       alertSoundInterval = setInterval(playAlertSound, 2000);
@@ -1084,12 +1030,10 @@
       document.getElementById('btn-switch-confirm').style.display    = '';
       document.getElementById('t-alertResolve').textContent    = t('alertResolveSwitch');
       document.getElementById('t-alertTitle').textContent      = t('alertSwitchTitle');
-      document.getElementById('t-alertHeadline').textContent   = t('alertSwitchHeadline');
       document.getElementById('alert-actual-count').textContent   = actual;
       document.getElementById('alert-expected-count').textContent = expected;
       document.getElementById('alert-new-product-val').textContent = newProduct;
       Els.alertView.classList.remove('hidden');
-      Els.mainView.classList.add('hidden');
       stopAlertSound();
       playAlertSound();
       alertSoundInterval = setInterval(playAlertSound, 2000);
@@ -1102,13 +1046,11 @@
       document.getElementById('btn-switch-confirm').style.display   = 'none';
       document.getElementById('t-alertResolve').textContent    = t('alertResolve');
       document.getElementById('t-alertTitle').textContent      = t('alertDupTitle');
-      document.getElementById('t-alertHeadline').textContent   = t('alertDupHeadline');
       document.getElementById('t-alertExpectedLabel').textContent = t('alertDupRefLabel');
       document.getElementById('t-alertWrongLabel').textContent    = t('alertDupSerialLabel');
       Els.alertExpected.textContent = state.ref;
       Els.alertScanned.textContent  = serial;
       Els.alertView.classList.remove('hidden');
-      Els.mainView.classList.add('hidden');
       stopAlertSound();
       playAlertSound();
       alertSoundInterval = setInterval(playAlertSound, 2000);
@@ -1125,14 +1067,12 @@
       stopAlertSound();
       state.pendingSwitch = null;
       Els.alertView.classList.add('hidden');
-      Els.mainView.classList.remove('hidden');
       Els.input.focus();
     };
 
     el('btn-switch-confirm').onclick = () => {
       stopAlertSound();
       Els.alertView.classList.add('hidden');
-      Els.mainView.classList.remove('hidden');
       if (state.pendingSwitch) {
         const { product, kind, kindLabel, qty } = state.pendingSwitch;
         state.pendingSwitch = null;
