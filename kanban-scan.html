@@ -984,7 +984,14 @@
         Els.scanCount.textContent = state.expectedQty
           ? `${state.total}/${state.expectedQty}` : state.total;
         addHistory(product, kindLabel, kind, 'ok', raw);
-        beep('ok');
+        // 場內＝客戶 → 這對剛配對成功，立即給完成音＋綠色閃爍
+        if (state.countInternal === state.countCustomer) {
+          beepBatchComplete();
+          flash('rgba(0, 230, 118, 0.45)');
+        } else {
+          beep('ok');
+          flash('rgba(0, 200, 255, 0.2)');
+        }
       } else {
         // 不同番號出現 — 場內張數必須等於客戶張數才能換批
         if (state.countInternal !== state.countCustomer) {
@@ -994,8 +1001,8 @@
           state.pendingSwitch = { product, kind, kindLabel, qty };
           triggerSwitchAlert(state.countInternal, state.countCustomer, product);
         } else {
-          // 兩邊一致，自動換批次
-          startNewBatch(product, kind, kindLabel, qty, 'batch', raw);
+          // 兩邊一致，自動換批次（完成音已在配對當下播過，改用普通音）
+          startNewBatch(product, kind, kindLabel, qty, 'ok', raw);
         }
       }
     }
