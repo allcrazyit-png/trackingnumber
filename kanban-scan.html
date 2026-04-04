@@ -192,6 +192,31 @@
     @media (hover: hover) { #btn-reset:hover { border-color: var(--red); color: var(--red); } }
     #btn-reset:active { border-color: var(--red); color: var(--red); }
 
+    /* Upload button */
+    #btn-upload {
+      display: flex; align-items: center; gap: 5px;
+      padding: 6px 12px;
+      background: transparent;
+      border: 1px solid rgba(0,200,255,0.4);
+      border-radius: 6px;
+      color: var(--cyan);
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.8rem; font-weight: 600;
+      letter-spacing: 1px; cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap; position: relative;
+    }
+    @media (hover: hover) { #btn-upload:hover { background: rgba(0,200,255,0.08); border-color: var(--cyan); } }
+    #btn-upload:active { background: rgba(0,200,255,0.08); }
+    .upload-badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 16px; height: 16px; padding: 0 4px;
+      background: var(--cyan); color: #060c18;
+      border-radius: 8px; font-size: 0.6rem; font-weight: 700;
+      line-height: 1;
+    }
+    .upload-badge.hidden { display: none; }
+
     /* Lang dropdown */
     .lang-dropdown { position:relative; }
     .lang-trigger {
@@ -234,15 +259,16 @@
       .logo-text-sub  { display:none; }
       .lang-label-text { display:none; }
 
-      /* 三個元素等寬 */
-      .scan-counter, #btn-reset, .lang-dropdown {
+      /* 四個元素等寬 */
+      .scan-counter, #btn-reset, #btn-upload, .lang-dropdown {
         flex: 1;
         display: flex !important;
         align-items: center;
         justify-content: center;
       }
       .scan-counter   { flex-direction:column; }
-      #btn-reset      { padding:10px 0; font-size:0.8rem; letter-spacing:0; width:100%; border-radius:0; border-left:1px solid var(--border); border-right:1px solid var(--border); border-top:none; border-bottom:none; }
+      #btn-reset      { padding:10px 0; font-size:0.8rem; letter-spacing:0; width:100%; border-radius:0; border-left:1px solid var(--border); border-right:none; border-top:none; border-bottom:none; }
+      #btn-upload     { padding:10px 0; font-size:0.8rem; letter-spacing:0; width:100%; border-radius:0; border-left:1px solid rgba(0,200,255,0.3); border-right:1px solid var(--border); border-top:none; border-bottom:none; }
       .lang-trigger   { padding:10px 0; font-size:1rem; width:100%; justify-content:center; border:none; border-radius:0; }
       .lang-dropdown  { border:none; }
       .lang-menu      { right:0; }
@@ -563,6 +589,8 @@
 
       <button id="btn-reset">⟳ 重置</button>
 
+      <button id="btn-upload" onclick="doUpload()">↑ 上傳<span id="upload-badge" class="upload-badge hidden"></span></button>
+
       <a id="qr-link" href="qr-gen.html" style="padding:7px 14px;border:1px solid rgba(0,200,255,0.4);
          border-radius:8px;color:var(--cyan);font-family:'Rajdhani',sans-serif;font-size:0.8rem;
          font-weight:700;letter-spacing:2px;text-transform:uppercase;text-decoration:none;
@@ -649,7 +677,6 @@
         <span id="last-raw">---</span>
       </div>
       <div class="footer-right">
-        <button id="btn-upload" onclick="doUpload()">↑ 上傳</button>
         <span id="status-dot-text">系統就緒</span>
       </div>
     </footer>
@@ -865,6 +892,8 @@
     const state = { ref: null, total: 0, countInternal: 0, countCustomer: 0,
                     expectedQty: null, pendingSwitch: null, scannedSerials: new Set(),
                     scanLogs: _savedLogs, uploadedCount: 0 };
+    // 頁面載入後顯示 badge（需等 DOM ready，故用 setTimeout）
+    setTimeout(() => updateUploadBadge && updateUploadBadge(), 0);
 
     const el  = id => document.getElementById(id);
     const Els = {
@@ -1116,6 +1145,18 @@
     }
     el('btn-reset').onclick = doReset;
 
+    // ── 上傳 badge ─────────────────────────────────────────
+    function updateUploadBadge() {
+      const pending = state.scanLogs.length - state.uploadedCount;
+      const badge = el('upload-badge');
+      if (pending > 0) {
+        badge.textContent = pending;
+        badge.classList.remove('hidden');
+      } else {
+        badge.classList.add('hidden');
+      }
+    }
+
     // ── 上傳（不重置）──────────────────────────────────────
     async function doUpload() {
       const btn = el('btn-upload');
@@ -1130,6 +1171,7 @@
         state.scanLogs.splice(0, state.uploadedCount + newLogs.length);
         state.uploadedCount = 0;
         localStorage.removeItem('kanban_scanLogs');
+        updateUploadBadge();
         Els.historyBody.innerHTML = `<tr><td colspan="4" style="padding:24px;text-align:center;color:var(--muted);font-style:italic">${t('historyEmpty')}</td></tr>`;
         btn.textContent = '完成 ✓'; btn.style.borderColor = 'var(--green)'; btn.style.color = 'var(--green)';
         setTimeout(() => { btn.disabled = false; btn.textContent = '↑ 上傳'; btn.style.borderColor = ''; btn.style.color = ''; }, 2000);
@@ -1146,6 +1188,7 @@
         now.toLocaleTimeString('zh-TW', { hour12: false });
       state.scanLogs.push({ scanned_at, scan_type: kind, sku: product || '', raw_qr: raw || '', result: result || '', session_id: SESSION_ID });
       localStorage.setItem('kanban_scanLogs', JSON.stringify(state.scanLogs));
+      updateUploadBadge();
       const badge = kind === 'internal'
         ? `<span class="badge badge-i">${t('badgeInternal')}</span>`
         : `<span class="badge badge-c">${t('badgeCustomer')}</span>`;
