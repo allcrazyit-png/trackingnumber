@@ -777,7 +777,7 @@
     const LANGS = {
       zh: {
         logo:'看板比對', refLabel:'基準料號', refEmpty:'尚未掃描',
-        scanLbl:'已掃張數', resetBtn:'⟳ 重置', qrLink:'QR 產生器 →',
+        scanLbl:'已掃張數', resetBtn:'⟳ 重置', uploadBtn:'↑ 上傳', qrLink:'QR 產生器 →',
         statusIdle:'請掃描看板', statusIdleSub:'客戶看板或場內看板皆可先掃',
         internalLabel:'場內看板', customerLabel:'客戶看板',
         historyTitle:'掃描記錄', historyRecent:'最近 10 筆',
@@ -801,7 +801,7 @@
       },
       vi: {
         logo:'So Sánh Kanban', refLabel:'Mã Chuẩn', refEmpty:'Chưa quét',
-        scanLbl:'Đã quét', resetBtn:'⟳ Đặt lại', qrLink:'Tạo QR →',
+        scanLbl:'Đã quét', resetBtn:'⟳ Đặt lại', uploadBtn:'↑ Tải lên', qrLink:'Tạo QR →',
         statusIdle:'Vui lòng quét Kanban', statusIdleSub:'Có thể quét kanban khách hàng hoặc nội bộ trước',
         internalLabel:'Kanban Nội bộ', customerLabel:'Kanban Khách hàng',
         historyTitle:'Lịch sử quét', historyRecent:'10 gần nhất',
@@ -825,7 +825,7 @@
       },
       id: {
         logo:'Verifikasi Kanban', refLabel:'Kode Referensi', refEmpty:'Belum discan',
-        scanLbl:'Sudah discan', resetBtn:'⟳ Reset', qrLink:'Buat QR →',
+        scanLbl:'Sudah discan', resetBtn:'⟳ Reset', uploadBtn:'↑ Unggah', qrLink:'Buat QR →',
         statusIdle:'Silakan scan Kanban', statusIdleSub:'Bisa scan kanban pelanggan atau internal lebih dulu',
         internalLabel:'Kanban Internal', customerLabel:'Kanban Pelanggan',
         historyTitle:'Riwayat Scan', historyRecent:'10 terbaru',
@@ -876,6 +876,10 @@
       ids.forEach(k => { const el = document.getElementById('t-'+k); if(el) el.textContent = L[k]; });
       document.getElementById('btn-reset').innerHTML =
         `${L.resetBtn} <span style="opacity:.5;font-size:.8em">ESC</span>`;
+      const uploadBadgeEl = document.getElementById('upload-badge');
+      document.getElementById('btn-upload').innerHTML =
+        `${L.uploadBtn}`;
+      document.getElementById('btn-upload').appendChild(uploadBadgeEl);
       document.getElementById('qr-link').textContent = L.qrLink;
       // Update current state text
       if (!state.ref) {
