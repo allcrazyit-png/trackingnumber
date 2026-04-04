@@ -420,14 +420,30 @@
     footer {
       background: rgba(13,20,33,0.95);
       border-top: 1px solid var(--border);
-      padding: 5px 28px;
+      padding: 6px 20px;
       flex-shrink: 0;
       display: flex; justify-content: space-between; align-items: center;
       font-size: 0.65rem;
       font-family: 'JetBrains Mono', monospace;
       color: var(--muted);
+      gap: 12px;
     }
-    .footer-right { display: flex; align-items: center; gap: 16px; }
+    .footer-left { display: flex; align-items: center; gap: 8px; overflow: hidden; }
+    #last-raw { color: var(--cyan); max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .footer-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+    #btn-upload {
+      padding: 3px 10px;
+      font-size: 0.65rem;
+      font-family: 'Rajdhani', sans-serif;
+      letter-spacing: 0.5px;
+      background: transparent;
+      border: 1px solid rgba(0,200,255,0.35);
+      border-radius: 6px;
+      color: var(--cyan);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    @media (hover: hover) { #btn-upload:hover { border-color: var(--cyan); background: rgba(0,200,255,0.08); } }
     #status-dot-text::before {
       content: '●';
       color: var(--green);
@@ -627,14 +643,13 @@
     </main>
 
     <footer>
-      <span>瑞全企業 · 看板比對系統 v2.3 ·<span id="last-raw" style="color:var(--cyan)">---</span></span>
+      <div class="footer-left">
+        <span>瑞全企業 · 看板比對系統 v2.3</span>
+        <span style="opacity:0.3">·</span>
+        <span id="last-raw">---</span>
+      </div>
       <div class="footer-right">
-        <button id="btn-upload" onclick="doUpload()" style="
-          padding:3px 10px; font-size:0.65rem; font-family:'Rajdhani',sans-serif;
-          background:transparent; border:1px solid rgba(0,200,255,0.35);
-          border-radius:6px; color:var(--cyan); cursor:pointer; letter-spacing:0.5px;
-          transition:all 0.15s;
-        ">↑ 上傳</button>
+        <button id="btn-upload" onclick="doUpload()">↑ 上傳</button>
         <span id="status-dot-text">系統就緒</span>
       </div>
     </footer>
@@ -846,9 +861,10 @@
     }
     // ─────────────────────────────────────────────────────
 
+    const _savedLogs = JSON.parse(localStorage.getItem('kanban_scanLogs') || '[]');
     const state = { ref: null, total: 0, countInternal: 0, countCustomer: 0,
                     expectedQty: null, pendingSwitch: null, scannedSerials: new Set(),
-                    scanLogs: [], uploadedCount: 0 };
+                    scanLogs: _savedLogs, uploadedCount: 0 };
 
     const el  = id => document.getElementById(id);
     const Els = {
@@ -1113,6 +1129,7 @@
       } else {
         state.scanLogs.splice(0, state.uploadedCount + newLogs.length);
         state.uploadedCount = 0;
+        localStorage.removeItem('kanban_scanLogs');
         Els.historyBody.innerHTML = `<tr><td colspan="4" style="padding:24px;text-align:center;color:var(--muted);font-style:italic">${t('historyEmpty')}</td></tr>`;
         btn.textContent = '完成 ✓'; btn.style.borderColor = 'var(--green)'; btn.style.color = 'var(--green)';
         setTimeout(() => { btn.disabled = false; btn.textContent = '↑ 上傳'; btn.style.borderColor = ''; btn.style.color = ''; }, 2000);
@@ -1122,8 +1139,13 @@
 
     // ── 歷史 ──────────────────────────────────────────────
     function addHistory(product, kindLabel, kind, result, raw) {
-      const now   = new Date().toLocaleTimeString('zh-TW', { hour12: false });
-      state.scanLogs.push({ scanned_at: now, scan_type: kind, sku: product || '', raw_qr: raw || '', session_id: SESSION_ID });
+      const now   = new Date();
+      const scanned_at = now.getFullYear() + '-' +
+        String(now.getMonth()+1).padStart(2,'0') + '-' +
+        String(now.getDate()).padStart(2,'0') + ' ' +
+        now.toLocaleTimeString('zh-TW', { hour12: false });
+      state.scanLogs.push({ scanned_at, scan_type: kind, sku: product || '', raw_qr: raw || '', result: result || '', session_id: SESSION_ID });
+      localStorage.setItem('kanban_scanLogs', JSON.stringify(state.scanLogs));
       const badge = kind === 'internal'
         ? `<span class="badge badge-i">${t('badgeInternal')}</span>`
         : `<span class="badge badge-c">${t('badgeCustomer')}</span>`;
