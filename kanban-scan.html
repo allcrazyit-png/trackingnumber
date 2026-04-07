@@ -672,7 +672,7 @@
 
     <footer>
       <div class="footer-left">
-        <span>瑞全企業 · 看板比對系統 v2.4</span>
+        <span>瑞全企業 · 看板比對系統 v2.5</span>
         <span style="opacity:0.3">·</span>
         <span id="last-raw">---</span>
       </div>
@@ -1153,11 +1153,13 @@
     function updateUploadBadge() {
       const pending = state.scanLogs.length - state.uploadedCount;
       const badge = el('upload-badge');
-      if (pending > 0) {
-        badge.textContent = pending;
-        badge.classList.remove('hidden');
-      } else {
-        badge.classList.add('hidden');
+      if (badge) {
+        if (pending > 0) {
+          badge.textContent = pending;
+          badge.classList.remove('hidden');
+        } else {
+          badge.classList.add('hidden');
+        }
       }
     }
 
@@ -1165,20 +1167,45 @@
     async function doUpload() {
       const btn = el('btn-upload');
       const newLogs = state.scanLogs.slice(state.uploadedCount);
-      if (!newLogs.length) { btn.textContent = '無新資料'; setTimeout(() => { btn.textContent = '↑ 上傳'; }, 1500); return; }
-      btn.disabled = true; btn.textContent = '上傳中…';
-      const { error } = await _sb.from('kanban_scans').insert(newLogs);
-      if (error) {
-        btn.textContent = '失敗 ✗'; btn.style.borderColor = 'var(--red)'; btn.style.color = 'var(--red)';
-        setTimeout(() => { btn.disabled = false; btn.textContent = '↑ 上傳'; btn.style.borderColor = ''; btn.style.color = ''; }, 2500);
-      } else {
+      
+      const setBtnHtml = (text) => {
+        btn.innerHTML = `${text}<span id="upload-badge" class="upload-badge hidden"></span>`;
+        updateUploadBadge();
+      };
+
+      if (!newLogs.length) { 
+        setBtnHtml('無新資料'); 
+        setTimeout(() => setBtnHtml(t('uploadBtn')), 1500); 
+        return; 
+      }
+      
+      btn.disabled = true; 
+      setBtnHtml('上傳中…');
+      
+      try {
+        const { error } = await _sb.from('kanban_scans').insert(newLogs);
+        if (error) throw error;
+        
         state.scanLogs.splice(0, state.uploadedCount + newLogs.length);
         state.uploadedCount = 0;
         localStorage.removeItem('kanban_scanLogs');
-        updateUploadBadge();
+        
+        setBtnHtml('完成 ✓'); 
+        btn.style.borderColor = 'var(--green)'; 
+        btn.style.color = 'var(--green)';
         Els.historyBody.innerHTML = `<tr><td colspan="4" style="padding:24px;text-align:center;color:var(--muted);font-style:italic">${t('historyEmpty')}</td></tr>`;
-        btn.textContent = '完成 ✓'; btn.style.borderColor = 'var(--green)'; btn.style.color = 'var(--green)';
-        setTimeout(() => { btn.disabled = false; btn.textContent = '↑ 上傳'; btn.style.borderColor = ''; btn.style.color = ''; }, 2000);
+      } catch (err) {
+        console.error('Upload error:', err);
+        setBtnHtml('失敗 ✗'); 
+        btn.style.borderColor = 'var(--red)'; 
+        btn.style.color = 'var(--red)';
+      } finally {
+        setTimeout(() => { 
+          btn.disabled = false; 
+          setBtnHtml(t('uploadBtn')); 
+          btn.style.borderColor = ''; 
+          btn.style.color = ''; 
+        }, 2000);
       }
     }
     window.doUpload = doUpload;
