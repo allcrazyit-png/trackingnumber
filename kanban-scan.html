@@ -1353,12 +1353,21 @@
         }
       });
       document.addEventListener('keydown', e => {
-        if (e.key === 'Escape') { e.preventDefault(); doReset(); }
-        if (e.metaKey || e.ctrlKey) return;
-        if (Els.alertView.classList.contains('hidden')) Els.input.focus();
+        if (e.key === 'Escape') { e.preventDefault(); doReset(); return; }
+        if (e.metaKey || e.ctrlKey || e.altKey) return;
+        
+        if (Els.alertView.classList.contains('hidden')) {
+          if (document.activeElement !== Els.input) {
+            Els.input.focus();
+            // 如果焦點原本不在輸入框，第一顆按鍵會被吃掉，因此需要手動補進去
+            if (e.key.length === 1) {
+              Els.input.value += e.key;
+            }
+          }
+        }
       });
       document.addEventListener('click', e => {
-        if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
+        if (e.target.tagName === 'BUTTON' || e.target.closest('button') || e.target.closest('.lang-dropdown')) return;
         if (Els.alertView.classList.contains('hidden')) Els.input.focus();
       });
       Els.input.focus();
