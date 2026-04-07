@@ -798,6 +798,7 @@
         alertDupTitle:'⚠ 重複掃描警報', alertDupHeadline:'同一張看板掃了兩次',
         alertDupRefLabel:'當前批次料號', alertDupSerialLabel:'重複序號',
         confirmReset:'確定要重置？本批次資料將上傳並清除。',
+        uploadNoData:'無新資料', uploading:'上傳中…', uploadOk:'完成 ✓', uploadFail:'失敗 ✗',
       },
       vi: {
         logo:'So Sánh Kanban', refLabel:'Mã Chuẩn', refEmpty:'Chưa quét',
@@ -822,6 +823,7 @@
         alertDupTitle:'⚠ CẢNH BÁO — Quét trùng', alertDupHeadline:'Kanban này đã được quét',
         alertDupRefLabel:'Mã lô hiện tại', alertDupSerialLabel:'Số serial trùng',
         confirmReset:'Xác nhận đặt lại? Dữ liệu lô này sẽ được tải lên và xóa.',
+        uploadNoData:'Không có dữ liệu', uploading:'Đang tải lên…', uploadOk:'Hoàn thành ✓', uploadFail:'Thất bại ✗',
       },
       id: {
         logo:'Verifikasi Kanban', refLabel:'Kode Referensi', refEmpty:'Belum discan',
@@ -846,6 +848,7 @@
         alertDupTitle:'⚠ PERINGATAN — Scan duplikat', alertDupHeadline:'Kanban ini sudah pernah discan',
         alertDupRefLabel:'Kode batch saat ini', alertDupSerialLabel:'Serial duplikat',
         confirmReset:'Konfirmasi reset? Data batch ini akan diunggah dan dihapus.',
+        uploadNoData:'Tidak ada data', uploading:'Mengunggah…', uploadOk:'Selesai ✓', uploadFail:'Gagal ✗',
       },
     };
 
@@ -1174,13 +1177,13 @@
       };
 
       if (!newLogs.length) { 
-        setBtnHtml('無新資料'); 
+        setBtnHtml(t('uploadNoData')); 
         setTimeout(() => setBtnHtml(t('uploadBtn')), 1500); 
         return; 
       }
       
       btn.disabled = true; 
-      setBtnHtml('上傳中…');
+      setBtnHtml(t('uploading'));
       
       try {
         const { error } = await _sb.from('kanban_scans').insert(newLogs);
@@ -1190,13 +1193,13 @@
         state.uploadedCount = 0;
         localStorage.removeItem('kanban_scanLogs');
         
-        setBtnHtml('完成 ✓'); 
+        setBtnHtml(t('uploadOk')); 
         btn.style.borderColor = 'var(--green)'; 
         btn.style.color = 'var(--green)';
         Els.historyBody.innerHTML = `<tr><td colspan="4" style="padding:24px;text-align:center;color:var(--muted);font-style:italic">${t('historyEmpty')}</td></tr>`;
       } catch (err) {
         console.error('Upload error:', err);
-        setBtnHtml('失敗 ✗'); 
+        setBtnHtml(t('uploadFail')); 
         btn.style.borderColor = 'var(--red)'; 
         btn.style.color = 'var(--red)';
       } finally {
