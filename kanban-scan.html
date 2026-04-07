@@ -1252,9 +1252,13 @@
     }
 
     // ── 音效 ──────────────────────────────────────────────
+    // 建立全域的 AudioContext 避免連續掃描時超出瀏覽器實例上限 (通常最多 6 個)
+    const sharedAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
     function beep(type) {
       try {
-        const ctx  = new (window.AudioContext || window.webkitAudioContext)();
+        if (sharedAudioCtx.state === 'suspended') sharedAudioCtx.resume();
+        const ctx  = sharedAudioCtx;
         const osc  = ctx.createOscillator();
         const gain = ctx.createGain();
         osc.connect(gain); gain.connect(ctx.destination);
@@ -1268,7 +1272,8 @@
 
     function beepBatchComplete() {
       try {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        if (sharedAudioCtx.state === 'suspended') sharedAudioCtx.resume();
+        const ctx = sharedAudioCtx;
         // 工廠環境：高頻方波三音上升，音量大，穿透噪音
         // 低→中→高，間隔短促，尾音拉長
         const notes = [
@@ -1292,7 +1297,8 @@
 
     function playAlertSound() {
       try {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        if (sharedAudioCtx.state === 'suspended') sharedAudioCtx.resume();
+        const ctx = sharedAudioCtx;
         for (let i = 0; i < 4; i++) {
           const osc  = ctx.createOscillator();
           const gain = ctx.createGain();
