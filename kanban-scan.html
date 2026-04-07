@@ -1332,9 +1332,14 @@
       if (!isMobile) Els.input.value = '';
       fallbackBuffer = '';
       
-      // 將字串內被掃入的 Enter 或 Tab 轉作空白，並清除連續空白
-      raw = raw.replace(/[\n\r\t]/g, ' ').replace(/\s+/g, ' ').trim();
-      if (raw) handleScan(raw);
+      // 將字串依換行符號（Enter）切開，確保連續刷碼（瞬間送入多張）時能各自獨立處理
+      const parts = raw.split('\n').map(v => v.trim()).filter(Boolean);
+      
+      for (let p of parts) {
+         // 將內嵌的 Tab 轉作空白，保留單一條碼的完整性
+         p = p.replace(/[\t]/g, ' ').replace(/\s+/g, ' ').trim();
+         if (p) handleScan(p);
+      }
     };
 
     document.addEventListener('keydown', e => {
@@ -1347,16 +1352,23 @@
         if (e.key.length === 1) Els.input.value += e.key;
       }
 
-      if (e.key === 'Enter' || e.key === 'Tab') {
+      if (e.key === 'Enter') {
         e.preventDefault();
-        // 遇到 Enter/Tab 暫不提交流程，而是轉为空白並等待 30ms (極短延遲以支援連續刷碼)
+        // 遇到 Enter 保留換行符號作為分界點
+        if (isMobile) fallbackBuffer += '\n'; 
+        else Els.input.value += '\n';
+        
+        clearTimeout(submitTimer);
+        submitTimer = setTimeout(processScan, 30);
+      } else if (e.key === 'Tab') {
+        e.preventDefault();
+        // 遇到內嵌 Tab 直接轉为空白
         if (isMobile) fallbackBuffer += ' '; 
         else Els.input.value += ' ';
         
         clearTimeout(submitTimer);
         submitTimer = setTimeout(processScan, 30);
       } else {
-        // 若有新字元立刻斷開提交流程，繼續收集字串 (預防條碼內建 Enter 截斷)
         clearTimeout(submitTimer);
         if (isMobile && e.key.length === 1) fallbackBuffer += e.key;
       }
