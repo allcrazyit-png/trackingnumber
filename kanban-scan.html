@@ -1349,12 +1349,12 @@
 
       if (e.key === 'Enter' || e.key === 'Tab') {
         e.preventDefault();
-        // 遇到 Enter/Tab 暫不提交流程，而是轉为空白並等待 150ms
+        // 遇到 Enter/Tab 暫不提交流程，而是轉为空白並等待 30ms (極短延遲以支援連續刷碼)
         if (isMobile) fallbackBuffer += ' '; 
         else Els.input.value += ' ';
         
         clearTimeout(submitTimer);
-        submitTimer = setTimeout(processScan, 150);
+        submitTimer = setTimeout(processScan, 30);
       } else {
         // 若有新字元立刻斷開提交流程，繼續收集字串 (預防條碼內建 Enter 截斷)
         clearTimeout(submitTimer);
