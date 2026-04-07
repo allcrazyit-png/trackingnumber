@@ -1042,7 +1042,7 @@
       // 第一張計入 1
       state.total = 1;
       updateCountDisplay(kind);
-      Els.scanCount.textContent = '1';
+      Els.scanCount.textContent = qty ? `1/${qty}` : '1';
       Els.dotText.textContent = t('comparing');
       const suffix = t('kindSuffix') ? `${kindLabel}${t('kindSuffix')}` : kindLabel;
       setCard('set', t('refSet'), `${suffix} · ${product}`, 'LOCKED');
