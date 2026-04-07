@@ -1323,49 +1323,46 @@
 
     // ── 輸入 ──────────────────────────────────────────────
     const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+    
+    let submitTimer = null;
+    let fallbackBuffer = '';
 
-    if (isMobile) {
-      // 手機：用 document keydown 接收藍牙 / USB OTG 掃描槍，不 focus input 避免彈鍵盤
-      let mobileBuffer = '';
-      let mobileBufferTimer = null;
-      document.addEventListener('keydown', e => {
-        if (e.key === 'Escape') { e.preventDefault(); doReset(); return; }
-        if (e.key === 'Enter' || e.key === 'Tab') {
-          e.preventDefault();
-          clearTimeout(mobileBufferTimer);
-          const v = mobileBuffer.trim();
-          mobileBuffer = '';
-          if (v) handleScan(v);
-        } else if (e.key.length === 1) {
-          clearTimeout(mobileBufferTimer);
-          mobileBufferTimer = setTimeout(() => { mobileBuffer = ''; }, 500);
-          mobileBuffer += e.key;
-        }
-      });
-    } else {
-      // 桌機：沿用 hidden input 方式
-      Els.input.addEventListener('keydown', e => {
-        if (e.key === 'Enter' || e.key === 'Tab') {
-          const v = Els.input.value.trim();
-          Els.input.value = '';
-          e.preventDefault();
-          if (v) handleScan(v);
-        }
-      });
-      document.addEventListener('keydown', e => {
-        if (e.key === 'Escape') { e.preventDefault(); doReset(); return; }
-        if (e.metaKey || e.ctrlKey || e.altKey) return;
+    const processScan = () => {
+      let raw = isMobile ? fallbackBuffer : Els.input.value;
+      if (!isMobile) Els.input.value = '';
+      fallbackBuffer = '';
+      
+      // 將字串內被掃入的 Enter 或 Tab 轉作空白，並清除連續空白
+      raw = raw.replace(/[\n\r\t]/g, ' ').replace(/\s+/g, ' ').trim();
+      if (raw) handleScan(raw);
+    };
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') { e.preventDefault(); doReset(); return; }
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (!Els.alertView.classList.contains('hidden')) return;
+
+      if (!isMobile && document.activeElement !== Els.input) {
+        Els.input.focus();
+        if (e.key.length === 1) Els.input.value += e.key;
+      }
+
+      if (e.key === 'Enter' || e.key === 'Tab') {
+        e.preventDefault();
+        // 遇到 Enter/Tab 暫不提交流程，而是轉为空白並等待 150ms
+        if (isMobile) fallbackBuffer += ' '; 
+        else Els.input.value += ' ';
         
-        if (Els.alertView.classList.contains('hidden')) {
-          if (document.activeElement !== Els.input) {
-            Els.input.focus();
-            // 如果焦點原本不在輸入框，第一顆按鍵會被吃掉，因此需要手動補進去
-            if (e.key.length === 1) {
-              Els.input.value += e.key;
-            }
-          }
-        }
-      });
+        clearTimeout(submitTimer);
+        submitTimer = setTimeout(processScan, 150);
+      } else {
+        // 若有新字元立刻斷開提交流程，繼續收集字串 (預防條碼內建 Enter 截斷)
+        clearTimeout(submitTimer);
+        if (isMobile && e.key.length === 1) fallbackBuffer += e.key;
+      }
+    });
+
+    if (!isMobile) {
       document.addEventListener('click', e => {
         if (e.target.tagName === 'BUTTON' || e.target.closest('button') || e.target.closest('.lang-dropdown')) return;
         if (Els.alertView.classList.contains('hidden')) Els.input.focus();
