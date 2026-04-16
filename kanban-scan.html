@@ -963,6 +963,10 @@
           return { kind: 'internal', product: body.slice(0, dashIdx), qty: null, serial: body.slice(dashIdx + 1) };
         return { kind: 'internal', product: body, qty: null, serial: null };
       }
+      // 客戶一維碼：三段用 - 分隔，第一段純數字（如 58810-BZ170-B0）
+      if (/^\d+-[A-Za-z0-9]+-[A-Za-z0-9]+$/.test(s)) {
+        return { kind: 'customer', product: s, qty: null };
+      }
       return { kind: 'internal', product: s, qty: null, serial: null };
     }
 
