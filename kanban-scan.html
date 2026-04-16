@@ -1371,9 +1371,10 @@
       const parts = raw.split('\n').map(v => v.trim()).filter(Boolean);
       dbg(`📦 processScan parts=${parts.length} raw="${raw.slice(0,20).replace(/\n/g,'↵')}"`);
 
-      for (let p of parts) {
-         // 將內嵌的 Tab 轉作空白，保留單一條碼的完整性
-         p = p.replace(/[\t]/g, ' ').replace(/\s+/g, ' ').trim();
+      for (let i = 0; i < parts.length; i++) {
+         let p = parts[i].replace(/[\t]/g, ' ').replace(/\s+/g, ' ').trim();
+         const { kind: k, product: prod } = extractProduct(p);
+         dbg(`[${i+1}/${parts.length}] kind=${k} prod=${prod} len=${p.length}`);
          if (p) handleScan(p);
       }
     };
