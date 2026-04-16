@@ -1366,10 +1366,11 @@
       let raw = isMobile ? fallbackBuffer : Els.input.value;
       if (!isMobile) Els.input.value = '';
       fallbackBuffer = '';
-      
+
       // 將字串依換行符號（Enter）切開，確保連續刷碼（瞬間送入多張）時能各自獨立處理
       const parts = raw.split('\n').map(v => v.trim()).filter(Boolean);
-      
+      dbg(`📦 processScan parts=${parts.length} raw="${raw.slice(0,20).replace(/\n/g,'↵')}"`);
+
       for (let p of parts) {
          // 將內嵌的 Tab 轉作空白，保留單一條碼的完整性
          p = p.replace(/[\t]/g, ' ').replace(/\s+/g, ' ').trim();
