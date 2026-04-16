@@ -910,7 +910,7 @@
       // Update current state text
       if (!state.ref) {
         Els.refDisplay.textContent = L.refEmpty;
-        Els.dotText.textContent    = L.sysReady;
+        if (Els.dotText) Els.dotText.textContent    = L.sysReady;
         setCard('idle', L.statusIdle, L.statusIdleSub, 'STANDBY');
         if (Els.historyBody.querySelector('[colspan]'))
           Els.historyBody.innerHTML = `<tr><td colspan="2" style="padding:24px;text-align:center;color:var(--muted);font-style:italic">${L.historyEmpty}</td></tr>`;
@@ -1075,7 +1075,7 @@
       state.total = 1;
       updateCountDisplay(kind);
       Els.scanCount.textContent = qty ? `1/${qty}` : '1';
-      Els.dotText.textContent = t('comparing');
+      if (Els.dotText) Els.dotText.textContent = t('comparing');
       const suffix = t('kindSuffix') ? `${kindLabel}${t('kindSuffix')}` : kindLabel;
       setCard('set', t('refSet'), `${suffix} · ${product}`, 'LOCKED');
       addHistory(product, kindLabel, kind, 'set', raw);
@@ -1177,7 +1177,7 @@
       document.getElementById('ref-badge').classList.add('hidden');
       document.querySelector('.counter-panel.internal').classList.remove('mismatch');
       document.querySelector('.counter-panel.customer').classList.remove('mismatch');
-      Els.dotText.textContent         = t('sysReady');
+      if (Els.dotText) Els.dotText.textContent         = t('sysReady');
       setCard('idle', t('statusIdle'), t('statusIdleSub'), 'STANDBY');
       if (!isMobile) Els.input.focus();
     }
