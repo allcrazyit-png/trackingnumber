@@ -595,6 +595,8 @@
 <body>
   <input id="barcode-input" type="password" lang="en" spellcheck="false" autocomplete="off" inputmode="none" />
   <div id="flash-overlay"></div>
+  <!-- DEBUG PANEL -->
+  <div id="debug-panel" style="position:fixed;bottom:0;left:0;right:0;background:#000;color:#0f0;font-size:11px;font-family:monospace;padding:6px 8px;z-index:9999;max-height:180px;overflow-y:auto;border-top:1px solid #0f0;white-space:pre-wrap;word-break:break-all;"></div>
 
   <!-- ════════ MAIN VIEW ════════ -->
   <div id="main-view">
@@ -966,6 +968,14 @@
       return { kind: 'internal', product: s, qty: null, serial: null };
     }
 
+    // ── DEBUG ─────────────────────────────────────────────
+    let debugLines = [];
+    function dbg(msg) {
+      debugLines.unshift(msg);
+      if (debugLines.length > 20) debugLines.pop();
+      document.getElementById('debug-panel').textContent = debugLines.join('\n');
+    }
+
     // ── 主處理 ────────────────────────────────────────────
     function handleScan(raw) {
       if (/[\u4E00-\u9FFF\u3100-\u312F]/.test(raw)) {
@@ -977,13 +987,16 @@
       const kindLabel = kind === 'customer' ? t('kindCustomer') : t('kindInternal');
 
       if (!product) {
+        dbg(`❌ 解析失敗 raw="${raw.slice(0,20)}"`);
         setCard('idle', t('noExtract'), `${raw.slice(0, 30)}`, 'ERROR');
         beep('error'); return;
       }
 
       if (state.ref === null) {
+        dbg(`🆕 新批次 kind=${kind} product=${product}`);
         startNewBatch(product, kind, kindLabel, qty, 'ok', raw);
       } else if (product === state.ref) {
+        dbg(`✅ 同番號 kind=${kind} cI=${state.countInternal} cC=${state.countCustomer}→+1`);
         // 只有正確才計數
         state.total++;
         if (serial) state.scannedSerials.add(serial);
@@ -1005,12 +1018,14 @@
       } else {
         // 不同番號出現 — 場內張數必須等於客戶張數才能換批
         if (state.countInternal !== state.countCustomer) {
+          dbg(`⚠️ 不同番號+不平衡 ref=${state.ref} new=${product} cI=${state.countInternal} cC=${state.countCustomer}`);
           // 兩邊不一致，跳警告
           addHistory(product, kindLabel, kind, 'error', raw);
           beep('error');
           state.pendingSwitch = { product, kind, kindLabel, qty };
           triggerSwitchAlert(state.countInternal, state.countCustomer, product);
         } else {
+          dbg(`🔄 換批次 new=${product}`);
           // 兩邊一致，自動換批次（完成音已在配對當下播過，改用普通音）
           startNewBatch(product, kind, kindLabel, qty, 'ok', raw);
         }
