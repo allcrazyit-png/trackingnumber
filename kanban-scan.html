@@ -671,8 +671,6 @@
     <footer>
       <div class="footer-left">
         <span>瑞全企業 · 看板比對系統 v2.5.3</span>
-        <span style="opacity:0.3">·</span>
-        <span id="last-raw">---</span>
       </div>
       <div class="footer-right">
         <span id="status-dot-text">系統就緒</span>
@@ -912,7 +910,6 @@
       ghostInternal: el('ghost-internal'),
       ghostCustomer: el('ghost-customer'),
       historyBody:   el('scan-history'),
-      lastRaw:       el('last-raw'),
       dotText:       el('status-dot-text'),
       alertExpected: el('alert-expected'),
       alertScanned:  el('alert-scanned'),
@@ -947,8 +944,6 @@
 
     // ── 主處理 ────────────────────────────────────────────
     function handleScan(raw) {
-      Els.lastRaw.textContent = raw.length > 50 ? raw.slice(0, 50) + '…' : raw;
-
       if (/[\u4E00-\u9FFF\u3100-\u312F]/.test(raw)) {
         flash('rgba(255,171,0,0.25)');
         return;
@@ -1144,7 +1139,6 @@
       document.querySelector('.counter-panel.internal').classList.remove('mismatch');
       document.querySelector('.counter-panel.customer').classList.remove('mismatch');
       Els.dotText.textContent         = t('sysReady');
-      Els.lastRaw.textContent         = '---';
       setCard('idle', t('statusIdle'), t('statusIdleSub'), 'STANDBY');
       if (!isMobile) Els.input.focus();
     }
