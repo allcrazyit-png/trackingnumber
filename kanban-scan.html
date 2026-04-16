@@ -104,7 +104,7 @@
       .counters         { gap: 5px; flex-shrink: 0; }
       .counter-panel    { padding: 5px 10px; }
       .counter-label    { margin-bottom: 0; font-size: 0.55rem; letter-spacing: 0.5px; line-height: 1.2; white-space: normal; }
-      .counter-num      { font-size: 1.5rem; line-height: 1; }
+      .counter-num      { font-size: 4rem; line-height: 1; }
       .counter-ghost    { display: none; }
 
       #btn-reset      { padding: 7px 12px; font-size: 0.8rem; }
@@ -267,9 +267,9 @@
         justify-content: center;
       }
       .scan-counter   { flex-direction:column; }
-      #btn-reset      { padding:10px 0; font-size:0.8rem; letter-spacing:0; width:100%; border-radius:0; border-left:1px solid var(--border); border-right:none; border-top:none; border-bottom:none; }
-      #btn-upload     { padding:10px 0; font-size:0.8rem; letter-spacing:0; width:100%; border-radius:0; border-left:1px solid rgba(0,200,255,0.3); border-right:1px solid var(--border); border-top:none; border-bottom:none; }
-      .lang-trigger   { padding:10px 0; font-size:1rem; width:100%; justify-content:center; border:none; border-radius:0; }
+      #btn-reset      { padding:14px 0; min-height:44px; font-size:0.8rem; letter-spacing:0; width:100%; border-radius:0; border-left:1px solid var(--border); border-right:none; border-top:none; border-bottom:none; }
+      #btn-upload     { padding:14px 0; min-height:44px; font-size:0.8rem; letter-spacing:0; width:100%; border-radius:0; border-left:1px solid rgba(0,200,255,0.3); border-right:1px solid var(--border); border-top:none; border-bottom:none; }
+      .lang-trigger   { padding:14px 0; min-height:44px; font-size:1rem; width:100%; justify-content:center; border:none; border-radius:0; }
       .lang-dropdown  { border:none; }
       .lang-menu      { right:0; }
       /* 桌機顯示的 ref-pill 在手機完全不佔空間 */
@@ -1235,7 +1235,7 @@
 
       const row = document.createElement('tr');
       row.innerHTML =
-        `<td class="td-time">${now}</td>` +
+        `<td class="td-time">${now.toLocaleTimeString('zh-TW', { hour12: false })}</td>` +
         `<td class="col-type">${badge}</td>` +
         `<td class="td-product">${product || '?'}</td>` +
         `<td>${res}</td>`;
