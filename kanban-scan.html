@@ -559,6 +559,36 @@
       text-transform: uppercase; cursor: pointer; transition: all 0.15s;
     }
     #btn-resolve:active { background: rgba(255,23,68,0.1); }
+
+    /* ── Scan line animation ───────────────────── */
+    @keyframes scan-sweep {
+      0%   { transform: translateY(-100%); opacity: 0; }
+      8%   { opacity: 1; }
+      92%  { opacity: 1; }
+      100% { transform: translateY(100%); opacity: 0; }
+    }
+    .scan-wrapper {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 5;
+      animation: scan-sweep 2.8s ease-in-out infinite;
+    }
+    .scan-wrapper .bar {
+      position: absolute;
+      left: 0; right: 0; top: 0;
+      height: 2px;
+    }
+    .scan-wrapper .glow {
+      position: absolute;
+      left: 0; right: 0; top: 0;
+      height: 60px;
+      opacity: 0.12;
+    }
+    .counter-panel.internal .bar  { background: linear-gradient(90deg, transparent, var(--cyan), var(--cyan), transparent); }
+    .counter-panel.internal .glow { background: linear-gradient(180deg, var(--cyan), transparent); }
+    .counter-panel.customer .bar  { background: linear-gradient(90deg, transparent, var(--orange), var(--orange), transparent); }
+    .counter-panel.customer .glow { background: linear-gradient(180deg, var(--orange), transparent); }
   </style>
 </head>
 
@@ -626,6 +656,7 @@
       <!-- Counter panels -->
       <div class="counters">
         <div class="counter-panel internal">
+          <div class="scan-wrapper" style="animation-delay: 0s;"><div class="bar"></div><div class="glow"></div></div>
           <div class="counter-label internal">
             <span class="counter-dot"></span><span id="t-internalLabel">場內看板</span>
           </div>
@@ -633,6 +664,7 @@
           <div class="counter-ghost" id="ghost-internal">0</div>
         </div>
         <div class="counter-panel customer">
+          <div class="scan-wrapper" style="animation-delay: 1.4s;"><div class="bar"></div><div class="glow"></div></div>
           <div class="counter-label customer">
             <span class="counter-dot"></span><span id="t-customerLabel">客戶看板</span>
           </div>
