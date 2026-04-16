@@ -38,6 +38,8 @@
             opacity: 0;
             pointer-events: none;
         }
+    </style>
+<style>
         @keyframes scan-sweep {
             0%   { transform: translateY(-100%); opacity: 0; }
             10%  { opacity: 1; }
@@ -51,24 +53,16 @@
             will-change: transform;
             pointer-events: none;
         }
-        .scan-line::before {
-            content: '';
+        .scan-line-bar {
             position: absolute;
-            left: 0;
-            right: 0;
-            top: 0;
-            height: 2px;
-            background: linear-gradient(90deg, transparent 0%, currentColor 20%, currentColor 80%, transparent 100%);
+            left: 0; right: 0; top: 0;
+            height: 3px;
         }
-        .scan-line::after {
-            content: '';
+        .scan-line-glow {
             position: absolute;
-            left: 0;
-            right: 0;
-            top: 0;
+            left: 0; right: 0; top: 0;
             height: 80px;
-            background: linear-gradient(180deg, currentColor 0%, transparent 100%);
-            opacity: 0.07;
+            opacity: 0.1;
         }
     </style>
 </head>
@@ -115,7 +109,10 @@
 </section>
 <section class="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1">
 <div class="relative group bg-primary/5 dark:bg-primary/10 border-4 border-primary/30 rounded-2xl flex flex-col items-center justify-center p-12 overflow-hidden">
-<div class="scan-line text-primary" style="animation-delay: 0s;"></div>
+<div class="scan-line" style="animation-delay: 0s;">
+  <div class="scan-line-bar" style="background: linear-gradient(90deg, transparent, #135bec, #135bec, transparent);"></div>
+  <div class="scan-line-glow" style="background: linear-gradient(180deg, #135bec, transparent);"></div>
+</div>
 <div class="absolute top-4 left-6 flex items-center gap-2 text-primary">
 <span class="material-symbols-outlined">inventory_2</span>
 <span class="text-2xl font-black">場內看板</span>
@@ -125,7 +122,10 @@
 <span class="material-symbols-outlined absolute -bottom-10 -right-10 text-[20rem] opacity-5 text-primary rotate-12">conveyor_belt</span>
 </div>
 <div class="relative group bg-industry-orange/5 dark:bg-industry-orange/10 border-4 border-industry-orange/30 rounded-2xl flex flex-col items-center justify-center p-12 overflow-hidden">
-<div class="scan-line text-industry-orange" style="animation-delay: 1.5s;"></div>
+<div class="scan-line" style="animation-delay: 1.5s;">
+  <div class="scan-line-bar" style="background: linear-gradient(90deg, transparent, #f97316, #f97316, transparent);"></div>
+  <div class="scan-line-glow" style="background: linear-gradient(180deg, #f97316, transparent);"></div>
+</div>
 <div class="absolute top-4 left-6 flex items-center gap-2 text-industry-orange">
 <span class="material-symbols-outlined">local_shipping</span>
 <span class="text-2xl font-black">客戶看板</span>
