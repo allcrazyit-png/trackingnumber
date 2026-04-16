@@ -1380,7 +1380,8 @@
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') { e.preventDefault(); doReset(); return; }
       if (e.metaKey || e.ctrlKey || e.altKey) return;
-      if (!Els.alertView.classList.contains('hidden')) return;
+      if (!Els.alertView.classList.contains('hidden')) { dbg(`🚫 alertView 擋住 key=${e.key}`); return; }
+      if (e.key === 'Enter') dbg(`⌨️ Enter isMobile=${isMobile} buf="${fallbackBuffer.slice(0,15)}" inp="${Els.input.value.slice(0,15)}"}`);
 
       if (!isMobile && document.activeElement !== Els.input) {
         Els.input.focus();
