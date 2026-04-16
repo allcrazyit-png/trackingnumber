@@ -657,13 +657,11 @@
             <thead>
               <tr>
                 <th id="t-thTime" style="width:90px">時間</th>
-                <th id="t-thType" class="col-type" style="width:80px">類別</th>
-                <th id="t-thCode">料號</th>
-                <th id="t-thResult" style="width:80px;text-align:right">結果</th>
+                <th id="t-thCode">序號</th>
               </tr>
             </thead>
             <tbody id="scan-history">
-              <tr><td colspan="4" style="padding:24px;text-align:center;color:var(--muted);font-style:italic">尚無記錄</td></tr>
+              <tr><td colspan="2" style="padding:24px;text-align:center;color:var(--muted);font-style:italic">尚無記錄</td></tr>
             </tbody>
           </table>
         </div>
@@ -890,7 +888,7 @@
         Els.dotText.textContent    = L.sysReady;
         setCard('idle', L.statusIdle, L.statusIdleSub, 'STANDBY');
         if (Els.historyBody.querySelector('[colspan]'))
-          Els.historyBody.innerHTML = `<tr><td colspan="4" style="padding:24px;text-align:center;color:var(--muted);font-style:italic">${L.historyEmpty}</td></tr>`;
+          Els.historyBody.innerHTML = `<tr><td colspan="2" style="padding:24px;text-align:center;color:var(--muted);font-style:italic">${L.historyEmpty}</td></tr>`;
       }
     }
     // ─────────────────────────────────────────────────────
@@ -1196,7 +1194,7 @@
         setBtnHtml(t('uploadOk')); 
         btn.style.borderColor = 'var(--green)'; 
         btn.style.color = 'var(--green)';
-        Els.historyBody.innerHTML = `<tr><td colspan="4" style="padding:24px;text-align:center;color:var(--muted);font-style:italic">${t('historyEmpty')}</td></tr>`;
+        Els.historyBody.innerHTML = `<tr><td colspan="2" style="padding:24px;text-align:center;color:var(--muted);font-style:italic">${t('historyEmpty')}</td></tr>`;
       } catch (err) {
         console.error('Upload error:', err);
         setBtnHtml(t('uploadFail')); 
@@ -1236,9 +1234,7 @@
       const row = document.createElement('tr');
       row.innerHTML =
         `<td class="td-time">${now.toLocaleTimeString('zh-TW', { hour12: false })}</td>` +
-        `<td class="col-type">${badge}</td>` +
-        `<td class="td-product">${product || '?'}</td>` +
-        `<td>${res}</td>`;
+        `<td class="td-product">${raw || '?'}</td>`;
       Els.historyBody.insertBefore(row, Els.historyBody.firstChild);
       while (Els.historyBody.children.length > 10)
         Els.historyBody.removeChild(Els.historyBody.lastChild);
