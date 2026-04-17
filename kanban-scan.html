@@ -964,8 +964,9 @@
         return { kind: 'internal', product: body, qty: null, serial: null };
       }
       // 客戶一維碼：三段用 - 分隔，第一段純數字（如 58810-BZ170-B0）
+      // 去掉 - 以配合場內看板料號格式（如 58810BZ170B0）
       if (/^\d+-[A-Za-z0-9]+-[A-Za-z0-9]+$/.test(s)) {
-        return { kind: 'customer', product: s, qty: null };
+        return { kind: 'customer', product: s.replace(/-/g, ''), qty: null };
       }
       return { kind: 'internal', product: s, qty: null, serial: null };
     }
