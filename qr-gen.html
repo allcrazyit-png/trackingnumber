@@ -282,7 +282,7 @@
     }
     .qty-btn:hover{border-color:var(--cyan);color:var(--cyan);}
     .qty-input{
-      width:36px;height:28px;border-radius:6px;border:1px solid var(--border);
+      width:48px;height:28px;border-radius:6px;border:1px solid var(--border);
       background:rgba(0,200,255,.08);color:var(--cyan);
       font-family:'JetBrains Mono',monospace;font-size:0.88rem;font-weight:700;
       text-align:center;outline:none;
@@ -485,7 +485,7 @@
   function changeItemQty(id, delta) {
     const item = queue.find(q => q.id === id);
     if (!item) return;
-    item.qty = Math.min(Math.max((item.qty || 1) + delta, 1), 99);
+    item.qty = Math.max((item.qty ?? 1) + delta, 0);
     renderQueue();
   }
 
@@ -493,8 +493,8 @@
     const item = queue.find(q => q.id === id);
     if (!item) return;
     const n = parseInt(val, 10);
-    if (isNaN(n) || n < 1) { if (clamp) { item.qty = 1; renderQueue(); } return; }
-    item.qty = Math.min(n, 99);
+    if (isNaN(n) || n < 0) { if (clamp) { item.qty = 0; renderQueue(); } return; }
+    item.qty = n;
     if (clamp) renderQueue();
     else {
       // 只更新總數顯示，不重新渲染整個列表（避免 input 失焦）
@@ -549,7 +549,7 @@
     area.innerHTML = '';
     const tmpCanvas = document.createElement('canvas');
     for (const it of items) {
-      for (let i = 0; i < (it.qty || 1); i++) {
+      for (let i = 0; i < (it.qty ?? 1); i++) {
         const serial = genSerial();
         const content = 'RAY:' + it.product + '-' + serial;
         try {
@@ -599,7 +599,7 @@
         </div>
         <div style="display:flex;align-items:center;gap:4px;margin:0 4px;">
           <button class="qty-btn" onclick="changeItemQty(${it.id},-1)">−</button>
-          <input class="qty-input" type="number" min="1" max="99" value="${it.qty || 1}"
+          <input class="qty-input" type="number" min="0" value="${it.qty ?? 1}"
                  oninput="setItemQty(${it.id},this.value)"
                  onblur="setItemQty(${it.id},this.value,true)"
                  onkeydown="if(event.key==='Enter')this.blur()">
