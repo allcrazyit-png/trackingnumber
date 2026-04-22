@@ -69,7 +69,7 @@
     /* ── LAYOUT ─────────────────────────────── */
     main{
       flex:1;display:grid;
-      grid-template-columns:1fr 360px;
+      grid-template-columns:1fr 460px;
       overflow:hidden;
     }
 
@@ -191,13 +191,13 @@
       display:flex;align-items:center;justify-content:center;
     }
     .qi-thumb img{width:100%;height:100%;}
-    .qi-info{flex:1;min-width:0;}
+    .qi-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px;}
     .qi-prod{
       font-family:'JetBrains Mono',monospace;font-size:0.8rem;font-weight:700;
-      color:var(--text);letter-spacing:1px;
-      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+      color:var(--text);letter-spacing:1px;white-space:nowrap;overflow:hidden;
     }
-    .qi-num{font-size:0.68rem;color:var(--muted);letter-spacing:1px;margin-top:3px;}
+    .qi-bottom{display:flex;align-items:center;gap:5px;}
+    .qi-num{font-size:0.68rem;color:var(--muted);letter-spacing:1px;flex:1;}
     .qi-acts{display:flex;gap:5px;}
     .qibtn{
       padding:5px 10px;font-family:'Rajdhani',sans-serif;font-size:0.68rem;
@@ -416,9 +416,15 @@
   loadQueue();
 
   // ── 擷取料號 ──────────────────────────
+  function toHalf(str) {
+    return str.replace(/[！-～]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xfee0))
+              .replace(/　/g, ' ');
+  }
+
   function extractProduct(raw) {
-    if (raw.includes('J004')) {
-      const m = raw.match(/\sE(.{15})(.{12})/);
+    const s = toHalf(raw).trim();
+    if (s.includes('J004') || s.startsWith('1AC')) {
+      const m = s.match(/\sE(.{15})(.{12})/);
       return m ? m[2] : null;
     }
     return null;
@@ -594,21 +600,21 @@
     list.innerHTML = queue.map((it, i) => `
       <div class="qi">
         <div class="qi-thumb"><img src="${it.dataURL}"></div>
-        <div class="qi-info">
+        <div class="qi-body">
           <div class="qi-prod">${it.product}</div>
-          <div class="qi-num"># ${String(i + 1).padStart(2, '0')}</div>
-        </div>
-        <div style="display:flex;align-items:center;gap:4px;margin:0 4px;">
-          <button class="qty-btn" onclick="changeItemQty(${it.id},-1)">−</button>
-          <input class="qty-input" type="number" min="0" value="${it.qty ?? 1}"
-                 oninput="setItemQty(${it.id},this.value)"
-                 onblur="setItemQty(${it.id},this.value,true);inp.focus()"
-                 onkeydown="if(event.key==='Enter')this.blur()">
-          <button class="qty-btn" onclick="changeItemQty(${it.id},1)">＋</button>
-        </div>
-        <div class="qi-acts">
-          <button class="qibtn qibtn-p" onclick="printItem(${it.id})">列印</button>
-          <button class="qibtn qibtn-d" onclick="removeFromQueue(${it.id})">刪</button>
+          <div class="qi-bottom">
+            <div class="qi-num"># ${String(i + 1).padStart(2, '0')}</div>
+            <button class="qty-btn" onclick="changeItemQty(${it.id},-1)">−</button>
+            <input class="qty-input" type="number" min="0" value="${it.qty ?? 1}"
+                   oninput="setItemQty(${it.id},this.value)"
+                   onblur="setItemQty(${it.id},this.value,true);inp.focus()"
+                   onkeydown="if(event.key==='Enter')this.blur()">
+            <button class="qty-btn" onclick="changeItemQty(${it.id},1)">＋</button>
+            <div class="qi-acts">
+              <button class="qibtn qibtn-p" onclick="printItem(${it.id})">列印</button>
+              <button class="qibtn qibtn-d" onclick="removeFromQueue(${it.id})">刪</button>
+            </div>
+          </div>
         </div>
       </div>
     `).join('');
