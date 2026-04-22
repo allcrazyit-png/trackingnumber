@@ -194,7 +194,8 @@
     .qi-info{flex:1;min-width:0;}
     .qi-prod{
       font-family:'JetBrains Mono',monospace;font-size:0.8rem;font-weight:700;
-      color:var(--text);letter-spacing:1px;word-break:break-all;
+      color:var(--text);letter-spacing:1px;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
     }
     .qi-num{font-size:0.68rem;color:var(--muted);letter-spacing:1px;margin-top:3px;}
     .qi-acts{display:flex;gap:5px;}
@@ -383,7 +384,7 @@
 
 <script>
   const inp = document.getElementById('barcode-input');
-  document.addEventListener('click', () => inp.focus());
+  document.addEventListener('click', e => { if (!e.target.closest('.qty-input')) inp.focus(); });
   inp.focus();
 
   let curProduct = null;
@@ -601,7 +602,7 @@
           <button class="qty-btn" onclick="changeItemQty(${it.id},-1)">−</button>
           <input class="qty-input" type="number" min="0" value="${it.qty ?? 1}"
                  oninput="setItemQty(${it.id},this.value)"
-                 onblur="setItemQty(${it.id},this.value,true)"
+                 onblur="setItemQty(${it.id},this.value,true);inp.focus()"
                  onkeydown="if(event.key==='Enter')this.blur()">
           <button class="qty-btn" onclick="changeItemQty(${it.id},1)">＋</button>
         </div>
