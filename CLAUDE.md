@@ -19,6 +19,18 @@
 - 字型：Rajdhani、JetBrains Mono、DM Sans（Google Fonts）
 - 深色主題為主（CSS 變數定義於 `:root`）
 
+## 部署策略
+
+| Branch | 用途 | 部署平台 | 資料上傳方式 |
+|--------|------|----------|-------------|
+| `main` | 公司內部使用 | GitHub Pages | 上傳至 Supabase |
+| `public` | 外部協力廠商使用 | Netlify（raychuan-kanban-scan.netlify.app） | 下載為本地 CSV |
+
+**修改規則：**
+- 修改公版（協力廠商）→ 在 `public` branch 上改，說「這是公版的修改」
+- 修改私版（公司內部）→ 在 `main` branch 上改
+- 兩個 branch 的 `vite.config.js` 設定不同，`public` 的 `base` 為 `/`、`main` 為 `/trackingnumber/`，且 `public` 有多頁 input 設定
+
 ## 開發指令
 
 ```bash
