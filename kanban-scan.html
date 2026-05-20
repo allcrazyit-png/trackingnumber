@@ -100,13 +100,6 @@
       header          { gap: 0; padding: 0; }
       main            { padding: 6px 8px; gap: 5px; }
 
-      /* ── Section 3: Counters ── */
-      .counters         { gap: 5px; flex-shrink: 0; }
-      .counter-panel    { padding: 5px 10px; }
-      .counter-label    { margin-bottom: 0; font-size: 0.55rem; letter-spacing: 0.5px; line-height: 1.2; white-space: normal; }
-      .counter-num      { font-size: 4rem; line-height: 1; }
-      .counter-ghost    { display: none; }
-
       #btn-reset      { padding: 7px 12px; font-size: 0.8rem; }
       footer          { padding: 3px 12px; font-size: 0.6rem; }
       #ref-badge      { padding: 5px 12px; }
@@ -368,6 +361,38 @@
     }
     .internal .counter-ghost { color: var(--cyan); }
     .customer .counter-ghost { color: var(--orange); }
+
+    @media (max-width: 640px) {
+      .counters {
+        grid-template-columns: 1fr;
+        gap: 6px;
+      }
+      .counter-panel {
+        min-height: 150px;
+        padding: 8px 14px 10px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+      .counter-label {
+        justify-content: center;
+        margin-bottom: 2px;
+        font-size: 0.7rem;
+        letter-spacing: 1.5px;
+        line-height: 1.2;
+        white-space: normal;
+      }
+      .counter-num {
+        font-size: 7rem;
+        line-height: 0.92;
+        text-align: center;
+        letter-spacing: 0;
+        font-variant-numeric: tabular-nums;
+      }
+      .counter-ghost {
+        display: none;
+      }
+    }
 
     /* ── History ───────────────────────────── */
     .history-panel {
