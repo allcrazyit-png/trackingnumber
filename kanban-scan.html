@@ -504,86 +504,124 @@
     @keyframes blink { 50% { opacity: 0.3; } }
 
     /* ═══════════════════════════════════════════
+       WARN VIEW (yellow, manual-dismiss)
+    ═══════════════════════════════════════════ */
+    #warn-view {
+      position: fixed; inset: 0; z-index: 90;
+      display: flex; align-items: center; justify-content: center;
+      padding: 16px;
+      background: rgba(0,0,0,0.45);
+      backdrop-filter: blur(2px);
+      animation: alert-in 0.15s ease-out;
+      cursor: pointer;
+    }
+    .warn-card {
+      background: #110d02;
+      border: 1.5px solid rgba(255,171,0,0.7);
+      border-radius: 14px;
+      box-shadow: 0 0 40px rgba(255,171,0,0.2), 0 8px 32px rgba(0,0,0,0.6);
+      width: 100%; max-width: 360px;
+      overflow: hidden;
+    }
+    .warn-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(255,171,0,0.2);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .warn-dot {
+      width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+      background: #ffab00; box-shadow: 0 0 8px #ffab00;
+      animation: blink 0.6s infinite;
+    }
+    .warn-header-title {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.75rem; font-weight: 700;
+      letter-spacing: 3px; text-transform: uppercase;
+      color: rgba(255,200,80,0.9);
+    }
+    .warn-body {
+      padding: 20px 16px;
+      text-align: center;
+    }
+    .warn-body-main {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1.6rem; font-weight: 700;
+      color: #ffab00; letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+    .warn-body-sub {
+      font-size: 0.85rem;
+      color: rgba(255,171,0,0.6);
+      letter-spacing: 1px;
+    }
+    .warn-btns {
+      padding: 0 16px 16px;
+    }
+    .warn-btns button {
+      width: 100%; padding: 10px;
+      background: rgba(255,171,0,0.15);
+      border: 1px solid rgba(255,171,0,0.4);
+      border-radius: 8px;
+      color: #ffab00;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.8rem; font-weight: 700;
+      letter-spacing: 2px; text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    /* ═══════════════════════════════════════════
        ALERT VIEW
     ═══════════════════════════════════════════ */
     #alert-view {
       position: fixed; inset: 0; z-index: 100;
       display: flex; align-items: center; justify-content: center;
-      padding: 16px;
-      background: rgba(0,0,0,0.55);
-      backdrop-filter: blur(2px);
-      animation: alert-in 0.15s ease-out;
+      padding: 24px;
+      animation: alert-bg-pulse 0.8s ease-in-out infinite alternate;
+    }
+    @keyframes alert-bg-pulse {
+      from { background: rgba(255,23,68,0.10); }
+      to   { background: rgba(255,23,68,0.28); }
     }
     @keyframes alert-in {
-      from { opacity: 0; transform: scale(0.97); }
+      from { opacity: 0; transform: scale(0.93); }
       to   { opacity: 1; transform: scale(1); }
     }
 
     .alert-card {
-      background: #110408;
-      border: 1.5px solid rgba(255,23,68,0.6);
-      border-radius: 14px;
-      box-shadow: 0 0 40px rgba(255,23,68,0.2), 0 8px 32px rgba(0,0,0,0.6);
-      width: 100%; max-width: 360px;
-      overflow: hidden;
+      background: #160206;
+      border: 2px solid rgba(255,23,68,0.85);
+      border-radius: 18px;
+      box-shadow: 0 0 80px rgba(255,23,68,0.55), 0 0 200px rgba(255,23,68,0.2);
+      width: 100%; max-width: 420px;
+      padding: 40px 28px 28px;
+      text-align: center;
+      animation: alert-in 0.15s ease-out;
     }
-
-    .alert-header {
-      padding: 12px 16px;
-      border-bottom: 1px solid rgba(255,23,68,0.2);
-      display: flex; align-items: center; gap: 8px;
+    .alert-icon {
+      font-size: 3.8rem; line-height: 1;
+      color: var(--red);
+      filter: drop-shadow(0 0 16px rgba(255,23,68,0.8));
+      animation: blink 0.5s infinite;
+      margin-bottom: 18px;
     }
-    .alert-blink {
-      width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
-      background: var(--red); box-shadow: 0 0 8px var(--red);
-      animation: blink 0.6s infinite;
-    }
-    .alert-header-title {
+    .alert-main-title {
       font-family: 'Rajdhani', sans-serif;
-      font-size: 0.75rem; font-weight: 700;
-      letter-spacing: 3px; text-transform: uppercase;
-      color: rgba(255,100,120,0.9);
-    }
-
-    .alert-body {
-      padding: 16px;
-      display: flex; flex-direction: column; gap: 8px;
-    }
-
-    .al-row {
-      display: flex; align-items: baseline; gap: 10px;
-    }
-    .al-label {
-      font-family: 'Rajdhani', sans-serif;
-      font-size: 0.65rem; font-weight: 700; letter-spacing: 2px;
-      text-transform: uppercase; color: var(--muted);
-      flex-shrink: 0; width: 36px;
-    }
-    .al-label.err { color: var(--red); }
-    .al-val {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 1rem; font-weight: 700; letter-spacing: 1px;
-      color: var(--text); word-break: break-all;
-    }
-    .al-val.err { color: var(--red); }
-    .al-val.cyan { color: var(--cyan); }
-
-    .alert-divider { height: 1px; background: rgba(255,255,255,0.06); margin: 4px 0; }
-
-    .alert-btns {
-      padding: 0 16px 14px;
-      display: flex; gap: 8px;
+      font-size: clamp(2.8rem, 10vw, 4.2rem);
+      font-weight: 900; letter-spacing: 6px; text-transform: uppercase;
+      color: var(--red);
+      text-shadow: 0 0 40px rgba(255,23,68,0.7), 0 0 80px rgba(255,23,68,0.3);
+      margin-bottom: 36px; line-height: 1;
     }
     #btn-resolve {
-      flex: 1; padding: 10px;
-      background: transparent;
-      border: 1px solid rgba(255,23,68,0.4);
-      border-radius: 8px; color: var(--red);
+      width: 100%; padding: 16px;
+      background: rgba(255,23,68,0.12);
+      border: 2px solid rgba(255,23,68,0.55);
+      border-radius: 10px; color: var(--red);
       font-family: 'Rajdhani', sans-serif;
-      font-size: 0.8rem; font-weight: 700; letter-spacing: 2px;
-      text-transform: uppercase; cursor: pointer; transition: all 0.15s;
+      font-size: 1.1rem; font-weight: 700; letter-spacing: 3px;
+      text-transform: uppercase; cursor: pointer; transition: background 0.15s;
     }
-    #btn-resolve:active { background: rgba(255,23,68,0.1); }
+    #btn-resolve:active { background: rgba(255,23,68,0.25); }
 
     /* ── Scan line animation ───────────────────── */
     @keyframes scan-sweep {
@@ -626,7 +664,7 @@
     <div class="company-bar">
       <span class="company-name">瑞全企業</span>
       <span class="company-sub">看板比對系統</span>
-      <span class="company-sub" style="margin-left:auto;opacity:0.6">v2.5.3</span>
+      <span class="company-sub" style="margin-left:auto;opacity:0.6">v2.6.0</span>
     </div>
     <header>
       <!-- 基準料號（桌機顯示） -->
@@ -729,52 +767,26 @@
   </div>
 
   <!-- ════════ ALERT VIEW ════════ -->
+  <div id="warn-view" class="hidden">
+    <div class="warn-card">
+      <div class="warn-header">
+        <div class="warn-dot"></div>
+        <span class="warn-header-title" id="t-warnTitle">條碼無法識別</span>
+      </div>
+      <div class="warn-body">
+        <div class="warn-body-main" id="t-warnSub">請重新掃描</div>
+      </div>
+      <div class="warn-btns">
+        <button id="btn-warn-resolve"><span id="t-warnResolve">確認解除</span></button>
+      </div>
+    </div>
+  </div>
+
   <div id="alert-view" class="hidden">
     <div class="alert-card">
-      <div class="alert-header">
-        <div class="alert-blink"></div>
-        <span class="alert-header-title" id="t-alertTitle">料號不符</span>
-      </div>
-      <div class="alert-body">
-        <!-- 料號不符 / 重複序號 -->
-        <div id="alert-codes-mismatch">
-          <div class="al-row">
-            <span class="al-label" id="t-alertExpectedLabel">基準</span>
-            <span class="al-val" id="alert-expected">---</span>
-          </div>
-          <div class="al-row">
-            <span class="al-label err" id="t-alertWrongLabel">掃到</span>
-            <span class="al-val err" id="alert-scanned">---</span>
-          </div>
-        </div>
-        <!-- 張數不符換批次 -->
-        <div id="alert-codes-switch" style="display:none">
-          <div class="al-row">
-            <span class="al-label">場內</span>
-            <span class="al-val" id="alert-actual-count">---</span>
-          </div>
-          <div class="al-row">
-            <span class="al-label err">客戶</span>
-            <span class="al-val err" id="alert-expected-count">---</span>
-          </div>
-        </div>
-        <div id="alert-new-product-row" style="display:none">
-          <div class="alert-divider"></div>
-          <div class="al-row" style="margin-top:8px">
-            <span class="al-label">新批</span>
-            <span class="al-val cyan" id="alert-new-product-val">---</span>
-          </div>
-        </div>
-      </div>
-      <div class="alert-btns">
-        <button id="btn-resolve"><span id="t-alertResolve">解除</span></button>
-        <button id="btn-switch-confirm" style="display:none;flex:1;padding:10px;
-          background:var(--cyan);border:none;border-radius:8px;color:#0d1421;
-          font-family:'Rajdhani',sans-serif;font-size:0.8rem;font-weight:700;
-          letter-spacing:2px;text-transform:uppercase;cursor:pointer;">
-          <span id="t-btnSwitchConfirm">確認換批次</span>
-        </button>
-      </div>
+      <div class="alert-icon">⚠</div>
+      <div class="alert-main-title" id="t-alertTitle">料號不符</div>
+      <button id="btn-resolve"><span id="t-alertResolve">返回</span></button>
     </div>
   </div>
 
@@ -822,9 +834,7 @@
         historyTitle:'掃描記錄', historyRecent:'最近 10 筆',
         thTime:'時間', thType:'類別', thCode:'料號', thResult:'結果',
         historyEmpty:'尚無記錄', scannerLocked:'掃描槍鎖定中',
-        alertTitle:'⚠ MISMATCH DETECTED — 料號不符警報',
-        alertHeadline:'料號不符', alertExpectedLabel:'基準料號（正確）',
-        alertWrongLabel:'掃到的料號（錯誤）', alertResolve:'確認處理完畢，解除警報',
+        alertTitle:'料號不符', alertResolve:'返回',
         sysReady:'系統就緒', comparing:'比對中',
         refSet:'基準已設定', matchOk:'料號一致', noExtract:'無法擷取料號',
         badgeInternal:'場內', badgeCustomer:'客戶',
@@ -838,6 +848,7 @@
         alertDupRefLabel:'當前批次料號', alertDupSerialLabel:'重複序號',
         confirmReset:'確定要重置？本批次資料將下載並清除。',
         uploadNoData:'無新資料', uploading:'下載中…', uploadOk:'完成 ✓', uploadFail:'失敗 ✗',
+        warnTitle:'條碼無法識別', warnSub:'請重新掃描', warnResolve:'確認解除',
       },
       vi: {
         logo:'So Sánh Kanban', refLabel:'Mã Chuẩn', refEmpty:'Chưa quét',
@@ -847,9 +858,7 @@
         historyTitle:'Lịch sử quét', historyRecent:'10 gần nhất',
         thTime:'Thời gian', thType:'Loại', thCode:'Mã hàng', thResult:'Kết quả',
         historyEmpty:'Chưa có dữ liệu', scannerLocked:'Máy quét sẵn sàng',
-        alertTitle:'⚠ CẢNH BÁO — Mã hàng không khớp',
-        alertHeadline:'Mã hàng không khớp', alertExpectedLabel:'Mã chuẩn (đúng)',
-        alertWrongLabel:'Mã vừa quét (sai)', alertResolve:'Xác nhận đã xử lý, tắt cảnh báo',
+        alertTitle:'Mã hàng không khớp', alertResolve:'Quay lại',
         sysReady:'Hệ thống sẵn sàng', comparing:'Đang so sánh',
         refSet:'Đã thiết lập chuẩn', matchOk:'Mã hàng khớp', noExtract:'Không đọc được mã',
         badgeInternal:'NB', badgeCustomer:'KH',
@@ -863,6 +872,7 @@
         alertDupRefLabel:'Mã lô hiện tại', alertDupSerialLabel:'Số serial trùng',
         confirmReset:'Xác nhận đặt lại? Dữ liệu lô này sẽ được tải về và xóa.',
         uploadNoData:'Không có dữ liệu', uploading:'Đang tải về…', uploadOk:'Hoàn thành ✓', uploadFail:'Thất bại ✗',
+        warnTitle:'Không đọc được mã', warnSub:'Vui lòng quét lại', warnResolve:'Xác nhận',
       },
       id: {
         logo:'Verifikasi Kanban', refLabel:'Kode Referensi', refEmpty:'Belum discan',
@@ -872,9 +882,7 @@
         historyTitle:'Riwayat Scan', historyRecent:'10 terbaru',
         thTime:'Waktu', thType:'Tipe', thCode:'Kode', thResult:'Hasil',
         historyEmpty:'Belum ada data', scannerLocked:'Scanner terkunci',
-        alertTitle:'⚠ PERINGATAN — Kode tidak sesuai',
-        alertHeadline:'Kode tidak sesuai', alertExpectedLabel:'Kode referensi (benar)',
-        alertWrongLabel:'Kode hasil scan (salah)', alertResolve:'Konfirmasi selesai, matikan peringatan',
+        alertTitle:'Kode tidak sesuai', alertResolve:'Kembali',
         sysReady:'Sistem siap', comparing:'Membandingkan',
         refSet:'Referensi ditetapkan', matchOk:'Kode sesuai', noExtract:'Kode tidak terbaca',
         badgeInternal:'INT', badgeCustomer:'CUST',
@@ -888,6 +896,7 @@
         alertDupRefLabel:'Kode batch saat ini', alertDupSerialLabel:'Serial duplikat',
         confirmReset:'Konfirmasi reset? Data batch ini akan diunduh dan dihapus.',
         uploadNoData:'Tidak ada data', uploading:'Mengunduh…', uploadOk:'Selesai ✓', uploadFail:'Gagal ✗',
+        warnTitle:'Kode tidak terbaca', warnSub:'Silakan scan ulang', warnResolve:'Konfirmasi',
       },
     };
 
@@ -912,9 +921,8 @@
       // Update static elements
       const ids = ['logo','refLabel','scanLbl','internalLabel','customerLabel',
                    'historyTitle','historyRecent','thTime','thType','thCode','thResult',
-                   'scannerLocked','alertTitle','alertHeadline','alertExpectedLabel',
-                   'alertWrongLabel','alertResolve','alertActualLabel','alertExpectedQtyLabel',
-                   'alertNewProductLabel','btnSwitchConfirm'];
+                   'scannerLocked','alertTitle','alertResolve',
+                   'warnTitle','warnSub','warnResolve'];
       ids.forEach(k => { const el = document.getElementById('t-'+k); if(el) el.textContent = L[k]; });
       document.getElementById('btn-reset').innerHTML =
         `${L.resetBtn} <span style="opacity:.5;font-size:.8em">ESC</span>`;
@@ -946,6 +954,7 @@
       input:         el('barcode-input'),
       mainView:      el('main-view'),
       alertView:     el('alert-view'),
+      warnView:      el('warn-view'),
       refDisplay:    el('ref-display'),
       scanCount:     el('scan-count'),
       countInternal: el('count-internal'),
@@ -976,6 +985,8 @@
       }
       if (INTERNAL_PREFIX && s.startsWith(INTERNAL_PREFIX)) {
         const body = s.slice(INTERNAL_PREFIX.length).trim();
+        if (body.includes(INTERNAL_PREFIX))
+          return { kind: 'unknown', product: null, qty: null, serial: null };
         const dashIdx = body.lastIndexOf('-');
         if (dashIdx > 0)
           return { kind: 'internal', product: body.slice(0, dashIdx), qty: null, serial: body.slice(dashIdx + 1) };
@@ -986,7 +997,7 @@
       if (/^\d+-[A-Za-z0-9]+-[A-Za-z0-9]+$/.test(s)) {
         return { kind: 'customer', product: s.replace(/-/g, ''), qty: null };
       }
-      return { kind: 'internal', product: s, qty: null, serial: null };
+      return { kind: 'unknown', product: null, qty: null, serial: null };
     }
 
     // ── 主處理 ────────────────────────────────────────────
@@ -1000,8 +1011,7 @@
       const kindLabel = kind === 'customer' ? t('kindCustomer') : t('kindInternal');
 
       if (!product) {
-        setCard('idle', t('noExtract'), `${raw.slice(0, 30)}`, 'ERROR');
-        beep('error'); return;
+        showWarn(); return;
       }
 
       if (state.ref === null) {
@@ -1032,7 +1042,7 @@
           addHistory(product, kindLabel, kind, 'error', raw);
           beep('error');
           state.pendingSwitch = { product, kind, kindLabel, qty };
-          triggerSwitchAlert(state.countInternal, state.countCustomer, product);
+          triggerAlert();
         } else {
           // 兩邊一致，自動換批次（完成音已在配對當下播過，改用普通音）
           startNewBatch(product, kind, kindLabel, qty, 'ok', raw);
@@ -1093,48 +1103,9 @@
     // ── 警報 ──────────────────────────────────────────────
     let alertSoundInterval = null;
 
-    function triggerAlert(wrongProduct) {
-      document.getElementById('alert-codes-mismatch').style.display = '';
-      document.getElementById('alert-codes-switch').style.display   = 'none';
-      document.getElementById('alert-new-product-row').style.display = 'none';
-      document.getElementById('btn-switch-confirm').style.display   = 'none';
+    function triggerAlert() {
+      document.getElementById('t-alertTitle').textContent  = t('alertTitle');
       document.getElementById('t-alertResolve').textContent = t('alertResolve');
-      document.getElementById('t-alertTitle').textContent   = t('alertTitle');
-      Els.alertExpected.textContent = state.ref;
-      Els.alertScanned.textContent  = wrongProduct;
-      Els.alertView.classList.remove('hidden');
-      stopAlertSound();
-      playAlertSound();
-      alertSoundInterval = setInterval(playAlertSound, 2000);
-    }
-
-    function triggerSwitchAlert(actual, expected, newProduct) {
-      document.getElementById('alert-codes-mismatch').style.display  = 'none';
-      document.getElementById('alert-codes-switch').style.display    = '';
-      document.getElementById('alert-new-product-row').style.display = '';
-      document.getElementById('btn-switch-confirm').style.display    = '';
-      document.getElementById('t-alertResolve').textContent    = t('alertResolveSwitch');
-      document.getElementById('t-alertTitle').textContent      = t('alertSwitchTitle');
-      document.getElementById('alert-actual-count').textContent   = actual;
-      document.getElementById('alert-expected-count').textContent = expected;
-      document.getElementById('alert-new-product-val').textContent = newProduct;
-      Els.alertView.classList.remove('hidden');
-      stopAlertSound();
-      playAlertSound();
-      alertSoundInterval = setInterval(playAlertSound, 2000);
-    }
-
-    function triggerDuplicateAlert(serial) {
-      document.getElementById('alert-codes-mismatch').style.display = '';
-      document.getElementById('alert-codes-switch').style.display   = 'none';
-      document.getElementById('alert-new-product-row').style.display = 'none';
-      document.getElementById('btn-switch-confirm').style.display   = 'none';
-      document.getElementById('t-alertResolve').textContent    = t('alertResolve');
-      document.getElementById('t-alertTitle').textContent      = t('alertDupTitle');
-      document.getElementById('t-alertExpectedLabel').textContent = t('alertDupRefLabel');
-      document.getElementById('t-alertWrongLabel').textContent    = t('alertDupSerialLabel');
-      Els.alertExpected.textContent = state.ref;
-      Els.alertScanned.textContent  = serial;
       Els.alertView.classList.remove('hidden');
       stopAlertSound();
       playAlertSound();
@@ -1148,21 +1119,16 @@
       }
     }
 
+    Els.warnView.onclick = () => {
+      stopWarnSound();
+      Els.warnView.classList.add('hidden');
+      Els.input.focus();
+    };
+
     el('btn-resolve').onclick = () => {
       stopAlertSound();
       state.pendingSwitch = null;
       Els.alertView.classList.add('hidden');
-      Els.input.focus();
-    };
-
-    el('btn-switch-confirm').onclick = () => {
-      stopAlertSound();
-      Els.alertView.classList.add('hidden');
-      if (state.pendingSwitch) {
-        const { product, kind, kindLabel, qty } = state.pendingSwitch;
-        state.pendingSwitch = null;
-        startNewBatch(product, kind, kindLabel, qty, 'batch');
-      }
       Els.input.focus();
     };
 
@@ -1320,6 +1286,35 @@
       } catch (e) {}
     }
 
+    let warnSoundInterval = null;
+    function stopWarnSound() {
+      if (warnSoundInterval) { clearInterval(warnSoundInterval); warnSoundInterval = null; }
+    }
+    function showWarn() {
+      Els.warnView.classList.remove('hidden');
+      stopWarnSound();
+      beepDouble();
+      warnSoundInterval = setInterval(beepDouble, 2000);
+    }
+
+    function beepDouble() {
+      try {
+        if (sharedAudioCtx.state === 'suspended') sharedAudioCtx.resume();
+        const ctx = sharedAudioCtx;
+        [0, 0.22].forEach(offset => {
+          const osc  = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain); gain.connect(ctx.destination);
+          osc.frequency.value = 600;
+          osc.type = 'square';
+          gain.gain.setValueAtTime(0.9, ctx.currentTime + offset);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + offset + 0.18);
+          osc.start(ctx.currentTime + offset);
+          osc.stop(ctx.currentTime + offset + 0.2);
+        });
+      } catch (e) {}
+    }
+
     function beepBatchComplete() {
       try {
         if (sharedAudioCtx.state === 'suspended') sharedAudioCtx.resume();
@@ -1402,7 +1397,7 @@
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') { e.preventDefault(); doReset(); return; }
       if (e.metaKey || e.ctrlKey || e.altKey) return;
-      if (!Els.alertView.classList.contains('hidden')) return;
+      if (!Els.alertView.classList.contains('hidden') || !Els.warnView.classList.contains('hidden')) return;
 
       if (!isMobile && document.activeElement !== Els.input) {
         Els.input.focus();
