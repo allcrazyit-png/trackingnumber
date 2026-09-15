@@ -423,11 +423,9 @@
 
   function extractProduct(raw) {
     const s = toHalf(raw).trim();
-    if (s.includes('J004') || s.startsWith('1AC') || s.startsWith('2AG')) {
-      const m = s.match(/\sE(.{15})(.{12})/);
-      return m ? m[2] : null;
-    }
-    return null;
+    // 客戶看板結構特徵：空白 + 任一字母(標記) + 15碼數字 + 12碼料號，與前綴/type欄位無關
+    const m = s.match(/\s[A-Za-z]\d{15}(.{12})/);
+    return m ? m[1] : null;
   }
 
   // ── 掃描 ──────────────────────────────

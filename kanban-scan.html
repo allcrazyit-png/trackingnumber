@@ -983,12 +983,12 @@
     // ── 料號擷取 ─────────────────────────────────────────
     function extractProduct(raw) {
       const s = toHalf(raw).trim();
-      if (s.includes('J004') || s.startsWith('1AC') || s.startsWith('2AG')) {
-        const m = s.match(/\sE(.{15})(.{12})/);
+      // 客戶看板結構特徵：空白 + 任一字母(標記) + 15碼數字 + 12碼料號，與前綴/type欄位無關
+      const m = s.match(/\s[A-Za-z]\d{15}(.{12})/);
+      if (m) {
         const qm = s.match(/\s(\d+)\w?\s*$/);
         const qty = qm ? parseInt(qm[1], 10) : null;
-        if (m) return { kind: 'customer', product: m[2], qty };
-        return { kind: 'customer', product: null, qty: null };
+        return { kind: 'customer', product: m[1], qty };
       }
       if (INTERNAL_PREFIX && s.startsWith(INTERNAL_PREFIX)) {
         const body = s.slice(INTERNAL_PREFIX.length).trim();
