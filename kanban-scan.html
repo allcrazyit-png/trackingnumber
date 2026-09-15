@@ -976,7 +976,7 @@
     // ── 料號擷取 ─────────────────────────────────────────
     function extractProduct(raw) {
       const s = toHalf(raw).trim();
-      if (s.includes('J004') || s.startsWith('1AC')) {
+      if (s.includes('J004') || s.startsWith('1AC') || s.startsWith('2AG')) {
         const m = s.match(/\sE(.{15})(.{12})/);
         const qm = s.match(/\s(\d+)\w?\s*$/);
         const qty = qm ? parseInt(qm[1], 10) : null;
